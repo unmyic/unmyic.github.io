@@ -1,0 +1,13 @@
+/* 让从文章标题同步过来的 KaTeX 在窄目录栏中保持行内排版。 */
+#card-toc .toc-text--katex-fixed .katex {
+  font-size: 1em;
+}
+
+#card-toc .toc-text--katex-fixed .katex-display {
+  display: inline;
+  margin: 0;
+}
+
+#card-toc .toc-text--katex-fixed .katex-html {
+  white-space: nowrap;
+}

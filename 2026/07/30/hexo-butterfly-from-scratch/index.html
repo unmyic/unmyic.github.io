@@ -1,0 +1,776 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Hexo + Butterfly 搭建教程 01：安装、配置与本地预览 | unmyic</title><meta name="author" content="unmyic,unmyic@gmail.com"><meta name="copyright" content="unmyic"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="从空目录开始安装 Hexo 与 Butterfly，理解站点配置、主题配置和文章 Front Matter 的分工，完成导航、个人信息、主题色与本地预览，并整理主题升级和常见报错的处理方法。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hexo + Butterfly 搭建教程 01：安装、配置与本地预览">
+<meta property="og:url" content="https://blog.unmyic.com/2026/07/30/hexo-butterfly-from-scratch/index.html">
+<meta property="og:site_name" content="unmyic">
+<meta property="og:description" content="从空目录开始安装 Hexo 与 Butterfly，理解站点配置、主题配置和文章 Front Matter 的分工，完成导航、个人信息、主题色与本地预览，并整理主题升级和常见报错的处理方法。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog.unmyic.com/img/post-covers/pixiv2.jpg">
+<meta property="article:published_time" content="2026-07-30T13:30:00.000Z">
+<meta property="article:modified_time" content="2026-07-30T13:30:00.000Z">
+<meta property="article:author" content="unmyic">
+<meta property="article:tag" content="Node.js">
+<meta property="article:tag" content="Hexo">
+<meta property="article:tag" content="Butterfly">
+<meta property="article:tag" content="Butterfly 搭建系列">
+<meta property="article:tag" content="博客搭建">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://blog.unmyic.com/img/post-covers/pixiv2.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Hexo + Butterfly 搭建教程 01：安装、配置与本地预览",
+  "url": "https://blog.unmyic.com/2026/07/30/hexo-butterfly-from-scratch/",
+  "image": "https://blog.unmyic.com/img/post-covers/pixiv2.jpg",
+  "datePublished": "2026-07-30T13:30:00.000Z",
+  "dateModified": "2026-07-30T13:30:00.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "unmyic",
+      "url": "https://blog.unmyic.com/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="https://blog.unmyic.com/2026/07/30/hexo-butterfly-from-scratch/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":400,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":500,"languages":{"author":"作者: unmyic","link":"链接: ","source":"来源: unmyic","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: true,
+  islazyloadPlugin: true,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Hexo + Butterfly 搭建教程 01：安装、配置与本地预览',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/self/dracula.css"><link rel="stylesheet" href="/css/custom-footer.css?v=6"><link rel="stylesheet" href="/css/hero-scroll.css?v=11"><link rel="stylesheet" href="/css/post-layout-switcher.css?v=1"><link rel="stylesheet" href="/css/theme-atmosphere.css?v=1"><link rel="stylesheet" href="/css/category-tiles.css?v=3"><link rel="stylesheet" href="/css/friend-tech-cards.css?v=4"><link rel="stylesheet" href="/css/tag-constellation.css?v=1"><link rel="stylesheet" href="/css/command-palette.css?v=2"><link rel="stylesheet" href="/css/project-showcase.css?v=1"><link rel="stylesheet" href="/css/summary-tooltip.css?v=1"><link rel="stylesheet" href="/css/site-changelog.css?v=1"><link rel="stylesheet" href="/css/runtime.css?v=3"><link rel="stylesheet" href="/css/toc-katex.css?v=1"><link rel="stylesheet" href="/css/music-player.css?v=10"><meta name="generator" content="Hexo 7.3.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><script>(()=>{
+  const $loadingBox = document.getElementById('loading-box')
+  const $body = document.body
+  const preloader = {
+    endLoading: () => {
+      if ($loadingBox.classList.contains('loaded')) return
+      $body.style.overflow = ''
+      $loadingBox.classList.add('loaded')
+    },
+    initLoading: () => {
+      $body.style.overflow = 'hidden'
+      $loadingBox.classList.remove('loaded')
+    }
+  }
+
+  preloader.initLoading()
+
+  if (document.readyState === 'complete') {
+    preloader.endLoading()
+  } else {
+    window.addEventListener('load', preloader.endLoading)
+    document.addEventListener('DOMContentLoaded', preloader.endLoading)
+    // Add timeout protection: force end after 7 seconds
+    setTimeout(preloader.endLoading, 7000)
+  }
+
+  if (true) {
+    btf.addGlobalFn('pjaxSend', preloader.initLoading, 'preloader_init')
+    btf.addGlobalFn('pjaxComplete', preloader.endLoading, 'preloader_end')
+  }
+})()</script><div id="web_bg" style="background-image: url(/img/banner-ocean-v2-2k.webp);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">9</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">25</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-archive"></i><span> 文章</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-comments"></i><span> 社交</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-globe"></i><span> 网站</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/log/"><i class="fa-fw fas fa-hammer"></i><span> 日志</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/post-covers/pixiv2.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/weblogo.svg" alt="Logo"></a><a class="nav-page-title" href="/"><span class="site-name">Hexo + Butterfly 搭建教程 01：安装、配置与本地预览</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-archive"></i><span> 文章</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-comments"></i><span> 社交</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-globe"></i><span> 网站</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/log/"><i class="fa-fw fas fa-hammer"></i><span> 日志</span></a></li></ul></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Hexo + Butterfly 搭建教程 01：安装、配置与本地预览</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-07-30T13:30:00.000Z" title="发表于 2026-07-30 21:30:00">2026-07-30</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-07-30T13:30:00.000Z" title="更新于 2026-07-30 21:30:00">2026-07-30</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Web-%E5%BC%80%E5%8F%91/">Web 开发</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">3.4k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>12分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><div id="post-outdate-notice" data="{&quot;limitDay&quot;:365,&quot;messagePrev&quot;:&quot;距离本文最后更新已经&quot;,&quot;messageNext&quot;:&quot;天，部分内容可能已经过时。&quot;,&quot;postUpdate&quot;:&quot;2026-07-30 21:30:00&quot;}" hidden></div><blockquote>
+<p>第 1 篇，共 6 篇 · <a href="/2026/07/30/hexo-butterfly-series/">系列总目录</a> · 上一篇：无 · <a href="/2026/07/30/hexo-butterfly-layout-config/">下一篇：导航、首页与文章页配置</a></p>
+</blockquote>
+<h2 id="前言">前言</h2>
+<p>这个博客最初也是从一套几乎没有修改的 Hexo + Butterfly 开始的。随着文章和组件逐渐增加，它后来拥有了亮暗主题背景、音乐播放器、分类磁贴、全局搜索、随机封面图池和自定义页脚等功能。</p>
+<p>不过，在添加这些功能之前，最重要的仍然是建立一套稳定、容易维护的基础结构。</p>
+<p>本系列将从一个空目录开始，逐步完成：</p>
+<ol>
+<li>Hexo 博客的创建与运行</li>
+<li>Butterfly 主题的安装和基础配置</li>
+<li>首页、文章页、分类、标签与友链页面</li>
+<li>一图流背景和明暗主题美化</li>
+<li>通过 CSS 与 JavaScript 添加自定义组件</li>
+<li>部署、更新日志和长期维护</li>
+</ol>
+<p>本文是系列第一篇，只处理安装、配置关系和首次本地预览。完成以后，你会得到一个可以正常写文章、切换主题并继续扩展的 Butterfly 博客。</p>
+<blockquote>
+<p>本文示例基于 Hexo 7.3 与 Butterfly 5.4。主题后续版本可能调整配置名称，请同时参考文章末尾的官方文档。</p>
+</blockquote>
+<span id="more"></span>
+<hr>
+<h2 id="一、开始之前需要准备什么">一、开始之前需要准备什么</h2>
+<p>Hexo 是一个静态网站生成器。我们用 Markdown 写文章，Hexo 将文章、主题模板和配置组合起来，生成可以部署到 GitHub Pages、Cloudflare Pages 等平台的静态网页。</p>
+<p>Butterfly 则是负责页面外观和交互的 Hexo 主题。</p>
+<p>整个过程可以简化为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs text">Markdown 文章<br>      +<br>Hexo 站点配置<br>      +<br>Butterfly 主题<br>      ↓<br>生成静态 HTML、CSS 和 JavaScript<br>      ↓<br>部署到网站托管平台<br></code></pre></td></tr></table></figure>
+<p>开始前请安装：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://nodejs.org/">Node.js</a></li>
+<li><a target="_blank" rel="noopener" href="https://git-scm.com/">Git</a></li>
+<li>一个代码编辑器，例如 Visual Studio Code</li>
+</ul>
+<p>打开终端，确认环境可用：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">node --version<br>npm --version<br>git --version<br></code></pre></td></tr></table></figure>
+<p>只要三条命令都能输出版本号，就可以继续。</p>
+<h3 id="Node-js-应该选择哪个版本">Node.js 应该选择哪个版本</h3>
+<p>建议选择 Node.js 官网当前仍受支持的 LTS 版本，不要使用已经停止维护的旧版本。Hexo、主题或插件的报错，有时并不是配置错误，而是 Node.js 版本过旧造成的。</p>
+<hr>
+<h2 id="二、创建一个新的-Hexo-博客">二、创建一个新的 Hexo 博客</h2>
+<h3 id="1-安装-Hexo-命令行工具">1. 安装 Hexo 命令行工具</h3>
+<p>可以把 Hexo CLI 安装到全局：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">npm install hexo-cli -g<br></code></pre></td></tr></table></figure>
+<p>然后创建博客：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">hexo init my-blog<br><span class="hljs-built_in">cd</span> my-blog<br>npm install<br></code></pre></td></tr></table></figure>
+<p>如果不希望安装全局命令，也可以使用 <code>npx</code>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">npx hexo init my-blog<br><span class="hljs-built_in">cd</span> my-blog<br>npm install<br></code></pre></td></tr></table></figure>
+<blockquote>
+<p><code>hexo init</code> 的目标文件夹最好为空。不要在已经存放重要文件的目录里直接初始化。</p>
+</blockquote>
+<h3 id="2-认识项目目录">2. 认识项目目录</h3>
+<p>初始化完成后，主要目录如下：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs text">my-blog/<br>├── _config.yml<br>├── package.json<br>├── scaffolds/<br>├── source/<br>│   └── _posts/<br>└── themes/<br></code></pre></td></tr></table></figure>
+<p>它们分别负责：</p>
+<table>
+<thead>
+<tr>
+<th>路径</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>_config.yml</code></td>
+<td>Hexo 站点级配置</td>
+</tr>
+<tr>
+<td><code>package.json</code></td>
+<td>npm 依赖和运行命令</td>
+</tr>
+<tr>
+<td><code>source/_posts</code></td>
+<td>Markdown 文章</td>
+</tr>
+<tr>
+<td><code>source</code></td>
+<td>页面、图片和自定义静态资源</td>
+</tr>
+<tr>
+<td><code>scaffolds</code></td>
+<td>新建文章时使用的模板</td>
+</tr>
+<tr>
+<td><code>themes</code></td>
+<td>使用 Git 下载的本地主题目录</td>
+</tr>
+<tr>
+<td><code>public</code></td>
+<td>执行生成命令后产生的网站文件</td>
+</tr>
+</tbody>
+</table>
+<p><code>public</code> 是自动生成目录，不应该在里面直接修改文章或样式。下一次执行 <code>hexo clean</code> 后，其中的手动修改会全部消失。</p>
+<h3 id="3-第一次启动">3. 第一次启动</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">npx hexo server<br></code></pre></td></tr></table></figure>
+<p>终端通常会显示：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">Hexo is running at http://localhost:4000/<br></code></pre></td></tr></table></figure>
+<p>在浏览器打开这个地址，就可以看到默认主题。</p>
+<p>停止服务时按：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">Ctrl + C<br></code></pre></td></tr></table></figure>
+<hr>
+<h2 id="三、安装-Butterfly">三、安装 Butterfly</h2>
+<p>Butterfly 可以通过 npm 或 Git 安装。本文使用 npm，因为依赖关系更加清晰，更新也比较方便。</p>
+<p>在 Hexo 根目录执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">npm install hexo-theme-butterfly --save<br>npm install hexo-renderer-pug hexo-renderer-stylus --save<br></code></pre></td></tr></table></figure>
+<p>安装完成后，npm 版本的主题通常位于：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">node_modules/hexo-theme-butterfly/<br></code></pre></td></tr></table></figure>
+<p>它不会出现在 <code>themes/butterfly</code> 中，这是正常现象。</p>
+<h3 id="启用主题">启用主题</h3>
+<p>打开 Hexo 根目录的 <code>_config.yml</code>，找到：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">theme:</span> <span class="hljs-string">landscape</span><br></code></pre></td></tr></table></figure>
+<p>修改为：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">theme:</span> <span class="hljs-string">butterfly</span><br></code></pre></td></tr></table></figure>
+<p>然后重新生成并启动：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">npx hexo clean<br>npx hexo generate<br>npx hexo server<br></code></pre></td></tr></table></figure>
+<p>如果页面已经变成 Butterfly 的卡片式布局，说明主题安装成功。</p>
+<hr>
+<h2 id="四、为什么需要-config-butterfly-yml">四、为什么需要 <code>_config.butterfly.yml</code></h2>
+<p>Butterfly 自带一份主题默认配置：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">node_modules/hexo-theme-butterfly/_config.yml<br></code></pre></td></tr></table></figure>
+<p>我们当然可以直接修改它，但不应该这样做。执行 <code>npm update</code> 或重新安装依赖时，<code>node_modules</code> 中的修改可能被覆盖。</p>
+<p>更安全的方法，是把主题配置复制到 Hexo 根目录，并命名为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">_config.butterfly.yml<br></code></pre></td></tr></table></figure>
+<p>Windows PowerShell 可以执行：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs powershell"><span class="hljs-built_in">Copy-Item</span> node_modules\hexo<span class="hljs-literal">-theme-butterfly</span>\_config.yml _config.butterfly.yml<br></code></pre></td></tr></table></figure>
+<p>macOS 或 Linux 可以执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">cp</span> node_modules/hexo-theme-butterfly/_config.yml _config.butterfly.yml<br></code></pre></td></tr></table></figure>
+<p>此后，个人设置都写在根目录的 <code>_config.butterfly.yml</code> 中。</p>
+<p>Hexo 会合并主题默认配置和个人主题配置；遇到相同字段时，根目录 <code>_config.butterfly.yml</code> 的优先级更高。</p>
+<blockquote>
+<p>复制配置之后，不要删除主题包中的原始 <code>_config.yml</code>。它仍然是主题的默认配置来源。</p>
+</blockquote>
+<hr>
+<h2 id="五、三个配置层分别负责什么">五、三个配置层分别负责什么</h2>
+<p>初次使用 Hexo 时，最容易混淆的是 <code>_config.yml</code>、<code>_config.butterfly.yml</code> 和文章顶部的 Front Matter。</p>
+<h3 id="1-Hexo-的-config-yml">1. Hexo 的 <code>_config.yml</code></h3>
+<p>它负责整个站点的基础数据和生成规则，例如：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">title:</span> <span class="hljs-string">我的博客</span><br><span class="hljs-attr">subtitle:</span> <span class="hljs-string">记录学习与创造</span><br><span class="hljs-attr">author:</span> <span class="hljs-string">your-name</span><br><span class="hljs-attr">language:</span> <span class="hljs-string">zh-CN</span><br><span class="hljs-attr">timezone:</span> <span class="hljs-string">Asia/Shanghai</span><br><br><span class="hljs-attr">url:</span> <span class="hljs-string">https://example.com</span><br><span class="hljs-attr">permalink:</span> <span class="hljs-string">:year/:month/:day/:title/</span><br><br><span class="hljs-attr">theme:</span> <span class="hljs-string">butterfly</span><br><span class="hljs-attr">per_page:</span> <span class="hljs-number">10</span><br></code></pre></td></tr></table></figure>
+<p>这里通常配置：</p>
+<ul>
+<li>网站名称和作者</li>
+<li>网站正式地址</li>
+<li>文章永久链接格式</li>
+<li>每页文章数量</li>
+<li>当前使用的主题</li>
+<li>分类、标签和归档生成规则</li>
+<li>部署目标</li>
+</ul>
+<h3 id="2-Butterfly-的-config-butterfly-yml">2. Butterfly 的 <code>_config.butterfly.yml</code></h3>
+<p>它负责主题外观和组件，例如：</p>
+<ul>
+<li>导航菜单</li>
+<li>Logo 和头像</li>
+<li>首页背景与文章封面</li>
+<li>亮暗主题</li>
+<li>侧栏卡片</li>
+<li>文章目录</li>
+<li>评论与搜索</li>
+<li>页面动画</li>
+<li>自定义 CSS 和 JavaScript</li>
+</ul>
+<h3 id="3-每篇文章的-Front-Matter">3. 每篇文章的 Front Matter</h3>
+<p>Markdown 最上方由 <code>---</code> 包围的区域用于设置单篇文章：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-meta">---</span><br><span class="hljs-attr">title:</span> <span class="hljs-string">我的第一篇文章</span><br><span class="hljs-attr">date:</span> <span class="hljs-number">2026-07-30 20:00:00</span><br><span class="hljs-attr">updated:</span> <span class="hljs-number">2026-07-30 20:00:00</span><br><span class="hljs-attr">categories:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">Web</span> <span class="hljs-string">开发</span><br><span class="hljs-attr">tags:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">Hexo</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">Butterfly</span><br><span class="hljs-attr">description:</span> <span class="hljs-string">这是显示在首页文章卡片上的简介。</span><br><span class="hljs-attr">cover:</span> <span class="hljs-string">/img/post-covers/example.webp</span><br><span class="hljs-attr">top_img:</span> <span class="hljs-string">/img/banner.webp</span><br><span class="hljs-meta">---</span><br></code></pre></td></tr></table></figure>
+<p>可以把三者记成：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">_config.yml             决定网站怎样生成<br>_config.butterfly.yml   决定主题怎样显示<br>Front Matter            决定这一篇文章怎样显示<br></code></pre></td></tr></table></figure>
+<hr>
+<h2 id="六、完成第一轮基础配置">六、完成第一轮基础配置</h2>
+<p>Butterfly 的完整配置很长，不需要第一次就把所有选项都打开。我们先完成最容易看到效果的部分。</p>
+<h3 id="1-设置-Logo-和导航栏">1. 设置 Logo 和导航栏</h3>
+<p>在 <code>_config.butterfly.yml</code> 中修改：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">nav:</span><br>  <span class="hljs-attr">logo:</span> <span class="hljs-string">/img/logo.svg</span><br>  <span class="hljs-attr">display_title:</span> <span class="hljs-literal">true</span><br>  <span class="hljs-attr">display_post_title:</span> <span class="hljs-literal">true</span><br>  <span class="hljs-attr">fixed:</span> <span class="hljs-literal">false</span><br><br><span class="hljs-attr">menu:</span><br>  <span class="hljs-string">首页:</span> <span class="hljs-string">/</span> <span class="hljs-string">||</span> <span class="hljs-string">fas</span> <span class="hljs-string">fa-home</span><br>  <span class="hljs-string">文章||fas</span> <span class="hljs-attr">fa-archive:</span><br>    <span class="hljs-string">归档:</span> <span class="hljs-string">/archives/</span> <span class="hljs-string">||</span> <span class="hljs-string">fas</span> <span class="hljs-string">fa-archive</span><br>    <span class="hljs-string">标签:</span> <span class="hljs-string">/tags/</span> <span class="hljs-string">||</span> <span class="hljs-string">fas</span> <span class="hljs-string">fa-tags</span><br>    <span class="hljs-string">分类:</span> <span class="hljs-string">/categories/</span> <span class="hljs-string">||</span> <span class="hljs-string">fas</span> <span class="hljs-string">fa-folder-open</span><br>  <span class="hljs-string">友链:</span> <span class="hljs-string">/link/</span> <span class="hljs-string">||</span> <span class="hljs-string">fas</span> <span class="hljs-string">fa-link</span><br></code></pre></td></tr></table></figure>
+<p>菜单格式可以理解为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">显示文字: 页面地址 || 图标类名<br></code></pre></td></tr></table></figure>
+<p>图片应放在 Hexo 根目录的 <code>source/img</code> 中：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">source/img/logo.svg<br></code></pre></td></tr></table></figure>
+<p>生成网站后，它的访问地址就是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">/img/logo.svg<br></code></pre></td></tr></table></figure>
+<h3 id="2-设置头像和社交链接">2. 设置头像和社交链接</h3>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">avatar:</span><br>  <span class="hljs-attr">img:</span> <span class="hljs-string">/img/avatar.png</span><br>  <span class="hljs-attr">effect:</span> <span class="hljs-literal">false</span><br><br><span class="hljs-attr">social:</span><br>  <span class="hljs-attr">fab fa-github:</span> <span class="hljs-string">https://github.com/your-name</span> <span class="hljs-string">||</span> <span class="hljs-string">GitHub</span> <span class="hljs-string">||</span> <span class="hljs-string">&#x27;#24292e&#x27;</span><br>  <span class="hljs-attr">fas fa-envelope:</span> <span class="hljs-string">mailto:you@example.com</span> <span class="hljs-string">||</span> <span class="hljs-string">Email</span> <span class="hljs-string">||</span> <span class="hljs-string">&#x27;#4a7dbe&#x27;</span><br></code></pre></td></tr></table></figure>
+<p>社交链接由四部分组成：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">图标: 地址 || 鼠标提示 || 图标颜色<br></code></pre></td></tr></table></figure>
+<h3 id="3-设置首页背景">3. 设置首页背景</h3>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">disable_top_img:</span> <span class="hljs-literal">false</span><br><span class="hljs-attr">default_top_img:</span> <span class="hljs-string">/img/background.webp</span><br><span class="hljs-attr">background:</span> <span class="hljs-string">/img/background.webp</span><br><span class="hljs-attr">footer_img:</span> <span class="hljs-string">/img/background.webp</span><br></code></pre></td></tr></table></figure>
+<p>建议把背景图片转换为 WebP，以降低文件大小。桌面背景最好准备较高分辨率，同时还要考虑手机竖屏裁切；后续文章会单独介绍桌面端、移动端和暗色主题使用不同背景的方法。</p>
+<h3 id="4-设置首页副标题">4. 设置首页副标题</h3>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">subtitle:</span><br>  <span class="hljs-attr">enable:</span> <span class="hljs-literal">true</span><br>  <span class="hljs-attr">effect:</span> <span class="hljs-literal">true</span><br>  <span class="hljs-attr">source:</span> <span class="hljs-literal">false</span><br>  <span class="hljs-attr">sub:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-string">吾生也有涯，而知也无涯</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-string">Life</span> <span class="hljs-string">is</span> <span class="hljs-string">finite</span> <span class="hljs-string">while</span> <span class="hljs-string">knowledge</span> <span class="hljs-string">is</span> <span class="hljs-string">infinite</span><br></code></pre></td></tr></table></figure>
+<p><code>effect: true</code> 会启用打字机动画。<code>source: false</code> 表示不读取第三方随机句子接口，只显示自己配置的内容。</p>
+<h3 id="5-设置文章卡片布局">5. 设置文章卡片布局</h3>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">index_layout:</span> <span class="hljs-number">3</span><br><br><span class="hljs-attr">index_post_content:</span><br>  <span class="hljs-attr">method:</span> <span class="hljs-number">2</span><br>  <span class="hljs-attr">length:</span> <span class="hljs-number">300</span><br></code></pre></td></tr></table></figure>
+<p><code>index_layout: 3</code> 表示首页文章封面左右交替。</p>
+<p>摘要方式 <code>method: 2</code> 表示：</p>
+<ol>
+<li>文章存在 <code>description</code> 时优先使用；</li>
+<li>没有时从正文自动截取。</li>
+</ol>
+<h3 id="6-设置蓝色主题">6. 设置蓝色主题</h3>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">theme_color:</span><br>  <span class="hljs-attr">enable:</span> <span class="hljs-literal">true</span><br>  <span class="hljs-attr">main:</span> <span class="hljs-string">&quot;#3B82F6&quot;</span><br>  <span class="hljs-attr">paginator:</span> <span class="hljs-string">&quot;#2563EB&quot;</span><br>  <span class="hljs-attr">button_hover:</span> <span class="hljs-string">&quot;#60A5FA&quot;</span><br>  <span class="hljs-attr">text_selection:</span> <span class="hljs-string">&quot;#93C5FD&quot;</span><br>  <span class="hljs-attr">link_color:</span> <span class="hljs-string">&quot;#2563EB&quot;</span><br>  <span class="hljs-attr">toc_color:</span> <span class="hljs-string">&quot;#3B82F6&quot;</span><br>  <span class="hljs-attr">scrollbar_color:</span> <span class="hljs-string">&quot;#3B82F6&quot;</span><br>  <span class="hljs-attr">meta_theme_color_light:</span> <span class="hljs-string">&quot;#ffffff&quot;</span><br>  <span class="hljs-attr">meta_theme_color_dark:</span> <span class="hljs-string">&quot;#0d0d0d&quot;</span><br></code></pre></td></tr></table></figure>
+<p>颜色值建议始终放在引号中，避免 YAML 把 <code>#</code> 后面的内容识别成注释。</p>
+<h3 id="7-启用暗色模式">7. 启用暗色模式</h3>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">darkmode:</span><br>  <span class="hljs-attr">enable:</span> <span class="hljs-literal">true</span><br>  <span class="hljs-attr">button:</span> <span class="hljs-literal">true</span><br>  <span class="hljs-attr">autoChangeMode:</span> <span class="hljs-literal">false</span><br><br><span class="hljs-attr">display_mode:</span> <span class="hljs-string">light</span><br></code></pre></td></tr></table></figure>
+<p>这样网站默认使用亮色模式，同时在右侧工具栏提供切换按钮。</p>
+<hr>
+<h2 id="七、创建归档、标签和分类页面">七、创建归档、标签和分类页面</h2>
+<p>归档通常由 Hexo 自动生成。标签页和分类总览页可以手动创建：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">npx hexo new page tags<br>npx hexo new page categories<br></code></pre></td></tr></table></figure>
+<p>打开 <code>source/tags/index.md</code>：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-meta">---</span><br><span class="hljs-attr">title:</span> <span class="hljs-string">标签</span><br><span class="hljs-attr">date:</span> <span class="hljs-number">2026-07-30 20:00:00</span><br><span class="hljs-attr">type:</span> <span class="hljs-string">tags</span><br><span class="hljs-meta">---</span><br></code></pre></td></tr></table></figure>
+<p>打开 <code>source/categories/index.md</code>：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-meta">---</span><br><span class="hljs-attr">title:</span> <span class="hljs-string">分类</span><br><span class="hljs-attr">date:</span> <span class="hljs-number">2026-07-30 20:00:00</span><br><span class="hljs-attr">type:</span> <span class="hljs-string">categories</span><br><span class="hljs-meta">---</span><br></code></pre></td></tr></table></figure>
+<p>只有文章 Front Matter 中真正填写了分类和标签，它们才会出现在对应页面。</p>
+<hr>
+<h2 id="八、创建并检查第一篇文章">八、创建并检查第一篇文章</h2>
+<p>执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">npx hexo new post <span class="hljs-string">&quot;my-first-post&quot;</span><br></code></pre></td></tr></table></figure>
+<p>Hexo 会在 <code>source/_posts</code> 中创建 Markdown 文件。加入一些内容：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs markdown">---<br>title: 我的第一篇文章<br>date: 2026-07-30 20:00:00<br>categories:<br><span class="hljs-bullet">  -</span> 随笔<br>tags:<br><span class="hljs-bullet">  -</span> Hexo<br><span class="hljs-section">description: 这是我的第一篇 Hexo 博客文章。</span><br><span class="hljs-section">---</span><br><br><span class="hljs-section">## 你好，Hexo</span><br><br>这是正文内容。<br><br>&lt;!-- more --&gt;<br><br>这里是展开文章后才能看到的内容。<br></code></pre></td></tr></table></figure>
+<p><code>&lt;!-- more --&gt;</code> 用于指定首页摘要的结束位置。它不是必须的，但能让首页卡片更加可控。</p>
+<p>重新启动本地服务器：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">npx hexo clean<br>npx hexo generate<br>npx hexo server<br></code></pre></td></tr></table></figure>
+<p>检查以下内容：</p>
+<ul>
+<li>首页是否出现文章</li>
+<li>封面和简介是否正确</li>
+<li>分类、标签能否点击</li>
+<li>导航栏是否跳转正确</li>
+<li>亮暗主题能否切换</li>
+<li>手机宽度下是否正常排版</li>
+</ul>
+<hr>
+<h2 id="九、常用命令与-npm-脚本">九、常用命令与 npm 脚本</h2>
+<p>Hexo 原生命令如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">npx hexo clean<br>npx hexo generate<br>npx hexo server<br>npx hexo deploy<br></code></pre></td></tr></table></figure>
+<p>含义分别是：</p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>clean</code></td>
+<td>删除上一次生成的缓存和 <code>public</code></td>
+</tr>
+<tr>
+<td><code>generate</code></td>
+<td>生成静态网站</td>
+</tr>
+<tr>
+<td><code>server</code></td>
+<td>启动本地预览</td>
+</tr>
+<tr>
+<td><code>deploy</code></td>
+<td>按部署配置发布网站</td>
+</tr>
+</tbody>
+</table>
+<p>也可以在 <code>package.json</code> 中定义更容易记忆的脚本：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs json"><span class="hljs-punctuation">&#123;</span><br>  <span class="hljs-attr">&quot;scripts&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span><br>    <span class="hljs-attr">&quot;clean&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;hexo clean&quot;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-attr">&quot;build&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;hexo generate&quot;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-attr">&quot;server&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;hexo server&quot;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-attr">&quot;deploy&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;hexo generate &amp;&amp; hexo deploy&quot;</span><br>  <span class="hljs-punctuation">&#125;</span><br><span class="hljs-punctuation">&#125;</span><br></code></pre></td></tr></table></figure>
+<p>之后就可以使用：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">npm run clean<br>npm run build<br>npm run server<br>npm run deploy<br></code></pre></td></tr></table></figure>
+<p><code>npm run deploy</code> 并不是另一种部署技术，它只是执行 <code>package.json</code> 中预先定义的一组命令。它还可以在部署前加入检查、生成更新日志等自动操作。</p>
+<hr>
+<h2 id="十、常见问题">十、常见问题</h2>
+<h3 id="1-localhost-4000-无法打开">1. <code>localhost:4000</code> 无法打开</h3>
+<p>先确认终端中的 Hexo Server 没有退出，并检查 4000 端口是否被其他程序占用。也可以换一个端口：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">npx hexo server -p 5000<br></code></pre></td></tr></table></figure>
+<p>然后访问：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">http://localhost:5000/<br></code></pre></td></tr></table></figure>
+<h3 id="2-页面显示-Pug-源代码或模板报错">2. 页面显示 Pug 源代码或模板报错</h3>
+<p>检查渲染器：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">npm install hexo-renderer-pug hexo-renderer-stylus --save<br></code></pre></td></tr></table></figure>
+<p>安装后重新执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">npx hexo clean<br>npx hexo generate<br></code></pre></td></tr></table></figure>
+<h3 id="3-修改配置后没有变化">3. 修改配置后没有变化</h3>
+<p>可能原因包括：</p>
+<ul>
+<li>YAML 缩进错误</li>
+<li>改错了配置文件</li>
+<li>本地服务器没有重新启动</li>
+<li>浏览器仍在使用缓存</li>
+<li>修改了 <code>public</code>，随后又被重新生成覆盖</li>
+<li>使用 <code>_config.butterfly.yml</code> 后仍在修改主题包内的配置</li>
+</ul>
+<p>可以依次执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">npx hexo clean<br>npx hexo generate<br>npx hexo server<br></code></pre></td></tr></table></figure>
+<h3 id="4-YAML-报错">4. YAML 报错</h3>
+<p>YAML 使用空格表示层级，不要使用 Tab：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">menu:</span><br>  <span class="hljs-string">首页:</span> <span class="hljs-string">/</span><br></code></pre></td></tr></table></figure>
+<p>下面这种写法层级不正确：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">menu:</span><br><span class="hljs-string">首页:</span> <span class="hljs-string">/</span><br></code></pre></td></tr></table></figure>
+<p>包含冒号、<code>#</code> 或其他特殊字符的文本，最好使用引号包裹。</p>
+<h3 id="5-npm-安装速度慢或失败">5. npm 安装速度慢或失败</h3>
+<p>先检查 Node.js、npm 和网络环境，不要一开始就反复删除整个项目。可以通过下面的命令检查依赖状态：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">npm install<br>npm <span class="hljs-built_in">ls</span> --depth=0<br></code></pre></td></tr></table></figure>
+<p>如果项目已经有 <code>package-lock.json</code>，在其他电脑恢复环境时应一起保留它。</p>
+<hr>
+<h2 id="十一、不要直接修改这些位置">十一、不要直接修改这些位置</h2>
+<p>为了以后能顺利更新主题，尽量不要直接修改：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs text">node_modules/hexo-theme-butterfly/<br>public/<br></code></pre></td></tr></table></figure>
+<p>个人文件建议放在：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs text">source/css/<br>source/js/<br>source/img/<br>source/_posts/<br></code></pre></td></tr></table></figure>
+<p>主题配置放在：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">_config.butterfly.yml<br></code></pre></td></tr></table></figure>
+<p>后续需要添加自定义样式和脚本时，可以使用 Butterfly 的 <code>inject</code> 配置加载，而不是修改主题本体：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">inject:</span><br>  <span class="hljs-attr">head:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-string">&lt;link</span> <span class="hljs-string">rel=&quot;stylesheet&quot;</span> <span class="hljs-string">href=&quot;/css/custom.css&quot;&gt;</span><br>  <span class="hljs-attr">bottom:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-string">&lt;script</span> <span class="hljs-string">defer</span> <span class="hljs-string">src=&quot;/js/custom.js&quot;&gt;&lt;/script&gt;</span><br></code></pre></td></tr></table></figure>
+<p>这也是本系列后续制作背景动画、音乐播放器和分类磁贴时采用的主要方式。</p>
+<hr>
+<h2 id="十二、下一步做什么">十二、下一步做什么</h2>
+<p>到这里，一个基础的 Hexo + Butterfly 博客已经搭建完成：</p>
+<ul>
+<li>Hexo 可以正常生成页面</li>
+<li>Butterfly 已安装并启用</li>
+<li>个人配置与主题包分离</li>
+<li>导航、头像、背景和主题色已经可以修改</li>
+<li>标签和分类页面已经建立</li>
+<li>已经能够创建和预览文章</li>
+</ul>
+<p>下一篇将继续介绍 Butterfly 的导航栏、首页文章卡片、文章 Front Matter、封面、侧栏和页脚配置，并结合本站当前配置说明每一项修改会产生什么效果。</p>
+<hr>
+<h2 id="参考资料与声明">参考资料与声明</h2>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/docs/">Hexo 官方文档</a></li>
+<li><a target="_blank" rel="noopener" href="https://butterfly.js.org/">Butterfly 官方文档</a></li>
+<li><a target="_blank" rel="noopener" href="https://butterfly.js.org/posts/21cfbf15/">Butterfly 文档：快速开始</a></li>
+</ul>
+<p>本文参考 Butterfly 官方文档，并结合本站实际搭建、配置和维护过程重新整理。不同版本的 Hexo、Butterfly 和第三方插件可能存在配置差异，请以对应版本的官方说明为准。</p>
+<p>本文部分结构与文字由 AI 协助整理，配置示例由作者结合实际项目进行检查。</p>
+<hr>
+<blockquote>
+<p>第 1 篇，共 6 篇 · <a href="/2026/07/30/hexo-butterfly-series/">返回系列总目录</a> · <a href="/2026/07/30/hexo-butterfly-layout-config/">下一篇：导航、首页与文章页配置</a></p>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://blog.unmyic.com/">unmyic</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://blog.unmyic.com/2026/07/30/hexo-butterfly-from-scratch/">https://blog.unmyic.com/2026/07/30/hexo-butterfly-from-scratch/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://blog.unmyic.com" target="_blank">unmyic</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Node-js/">Node.js</a><a class="post-meta__tags" href="/tags/Hexo/">Hexo</a><a class="post-meta__tags" href="/tags/Butterfly/">Butterfly</a><a class="post-meta__tags" href="/tags/Butterfly-%E6%90%AD%E5%BB%BA%E7%B3%BB%E5%88%97/">Butterfly 搭建系列</a><a class="post-meta__tags" href="/tags/%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/">博客搭建</a></div><div class="post-share"><div class="social-share" data-image="/img/post-covers/pixiv2.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/07/30/hexo-butterfly-series/" title="Hexo + Butterfly 个性化博客搭建指南"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/pixiv2.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Hexo + Butterfly 个性化博客搭建指南</div></div><div class="info-2"><div class="info-item-1">从零安装 Hexo 与 Butterfly，逐步完成基础配置、页面美化、自定义组件和主题分离。全系列共六篇，既适合第一次搭建博客，也适合希望长期维护和形成独立设计的使用者。</div></div></div></a><a class="pagination-related" href="/2026/07/30/hexo-butterfly-layout-config/" title="Hexo + Butterfly 搭建教程 02：导航、首页与文章页配置"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/pixiv2.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Hexo + Butterfly 搭建教程 02：导航、首页与文章页配置</div></div><div class="info-2"><div class="info-item-1">逐项配置 Butterfly 的导航栏、首页文章卡片、文章 Front Matter、封面、目录、侧栏与页脚，并说明全局配置和单篇文章配置的覆盖关系。</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/07/30/hexo-butterfly-series/" title="Hexo + Butterfly 个性化博客搭建指南"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/pixiv2.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="fas fa-history fa-fw"></i> 2026-07-30</div><div class="info-item-2">Hexo + Butterfly 个性化博客搭建指南</div></div><div class="info-2"><div class="info-item-1">从零安装 Hexo 与 Butterfly，逐步完成基础配置、页面美化、自定义组件和主题分离。全系列共六篇，既适合第一次搭建博客，也适合希望长期维护和形成独立设计的使用者。</div></div></div></a><a class="pagination-related" href="/2025/08/20/Node-js%E4%BB%8B%E7%BB%8D/" title="Node.js介绍"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/node.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="fas fa-history fa-fw"></i> 2026-07-24</div><div class="info-item-2">Node.js介绍</div></div><div class="info-2"><div class="info-item-1">在搭建Hexo博客时，每个教程的第一步都会让你安装环境依赖，而第一个安装的便是Node.js，那么到底什么是Node.js，它在我们的Blog搭建中起了什么作用？实际上，Node.js是一个开源且跨平台的JavaScript运行环境，有了Node，Hexo才能运行、装插件、生成网站。</div></div></div></a><a class="pagination-related" href="/2026/07/28/hexo-category-tiles-guide/" title="为 Hexo 分类页添加全息磁贴：3D 倾斜、动态反光与明暗主题"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/6.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="fas fa-history fa-fw"></i> 2026-07-28</div><div class="info-item-2">为 Hexo 分类页添加全息磁贴：3D 倾斜、动态反光与明暗主题</div></div><div class="info-2"><div class="info-item-1">将 Butterfly 默认的分类文字列表增强为全息收藏卡式磁贴，加入分类统计、主题色、3D 倾斜、指针反光、暗色适配、移动端降级与 PJAX 支持，并提供可交互预览和完整源码。</div></div></div></a><a class="pagination-related" href="/2026/07/27/custom-music-player-guide/" title="如何实现一个全站悬浮音乐播放器：Hexo 部署、PJAX 持久化与源码分享"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/pixiv1.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="fas fa-history fa-fw"></i> 2026-07-28</div><div class="info-item-2">如何实现一个全站悬浮音乐播放器：Hexo 部署、PJAX 持久化与源码分享</div></div><div class="info-2"><div class="info-item-1">分享本站左下角悬浮音乐播放器的完整实现，介绍网易云歌单接入、播放模式、音量控制、30 秒试听曲目跳过、PJAX 全站持久化，以及 Hexo、普通网页和其他框架中的部署方式。</div></div></div></a><a class="pagination-related" href="/2026/07/28/header-moment-clock-guide/" title="为博客添加一个页首时光状态组件：实时时钟、问候与今日进度"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/pixiv5.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="fas fa-history fa-fw"></i> 2026-07-28</div><div class="info-item-2">为博客添加一个页首时光状态组件：实时时钟、问候与今日进度</div></div><div class="info-2"><div class="info-item-1">使用原生 JavaScript 和 CSS 实现一个页首时光状态组件，显示访客本地时间、日期、时段问候与今日进度，并介绍 Hexo Butterfly、普通网页及 PJAX 环境中的部署方式。</div></div></div></a><a class="pagination-related" href="/2026/07/26/markdown-html-guide/" title="Markdown 与 HTML：从基础语法到博客美化"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/9.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="fas fa-history fa-fw"></i> 2026-07-28</div><div class="info-item-2">Markdown 与 HTML：从基础语法到博客美化</div></div><div class="info-2"><div class="info-item-1">系统梳理 Markdown 的常用语法、它们生成的 HTML 结构，以及 Markdown 不便表达时如何使用 HTML 与 CSS，为 Hexo 博客加入提示卡片、折叠内容、按钮、进度条和响应式布局。</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="gitalk-container"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">unmyic</div><div class="author-info-description">谁终将声震人间，必长久深自缄默</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">9</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">25</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/unmyic"><i class="fab fa-github"></i><span>访问 GitHub</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/unmyic" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="/img/QR/wechat.jpg" target="_blank" title="微信二维码"><i class="fa-brands fa-weixin" style="color: #07c160;"></i></a><a class="social-icon" href="https://space.bilibili.com/3494367889197271" target="_blank" title="哔哩哔哩"><i class="fa-brands fa-bilibili" style="color: #00a1d6;"></i></a><a class="social-icon" href="mailto:unmyic@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">网站还在持续建设中</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%BC%80%E5%A7%8B%E4%B9%8B%E5%89%8D%E9%9C%80%E8%A6%81%E5%87%86%E5%A4%87%E4%BB%80%E4%B9%88"><span class="toc-number">2.</span> <span class="toc-text">一、开始之前需要准备什么</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Node-js-%E5%BA%94%E8%AF%A5%E9%80%89%E6%8B%A9%E5%93%AA%E4%B8%AA%E7%89%88%E6%9C%AC"><span class="toc-number">2.1.</span> <span class="toc-text">Node.js 应该选择哪个版本</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E6%96%B0%E7%9A%84-Hexo-%E5%8D%9A%E5%AE%A2"><span class="toc-number">3.</span> <span class="toc-text">二、创建一个新的 Hexo 博客</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%AE%89%E8%A3%85-Hexo-%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7"><span class="toc-number">3.1.</span> <span class="toc-text">1. 安装 Hexo 命令行工具</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E8%AE%A4%E8%AF%86%E9%A1%B9%E7%9B%AE%E7%9B%AE%E5%BD%95"><span class="toc-number">3.2.</span> <span class="toc-text">2. 认识项目目录</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E7%AC%AC%E4%B8%80%E6%AC%A1%E5%90%AF%E5%8A%A8"><span class="toc-number">3.3.</span> <span class="toc-text">3. 第一次启动</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%AE%89%E8%A3%85-Butterfly"><span class="toc-number">4.</span> <span class="toc-text">三、安装 Butterfly</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%AF%E7%94%A8%E4%B8%BB%E9%A2%98"><span class="toc-number">4.1.</span> <span class="toc-text">启用主题</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81-config-butterfly-yml"><span class="toc-number">5.</span> <span class="toc-text">四、为什么需要 _config.butterfly.yml</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E4%B8%89%E4%B8%AA%E9%85%8D%E7%BD%AE%E5%B1%82%E5%88%86%E5%88%AB%E8%B4%9F%E8%B4%A3%E4%BB%80%E4%B9%88"><span class="toc-number">6.</span> <span class="toc-text">五、三个配置层分别负责什么</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-Hexo-%E7%9A%84-config-yml"><span class="toc-number">6.1.</span> <span class="toc-text">1. Hexo 的 _config.yml</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-Butterfly-%E7%9A%84-config-butterfly-yml"><span class="toc-number">6.2.</span> <span class="toc-text">2. Butterfly 的 _config.butterfly.yml</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E6%AF%8F%E7%AF%87%E6%96%87%E7%AB%A0%E7%9A%84-Front-Matter"><span class="toc-number">6.3.</span> <span class="toc-text">3. 每篇文章的 Front Matter</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E5%AE%8C%E6%88%90%E7%AC%AC%E4%B8%80%E8%BD%AE%E5%9F%BA%E7%A1%80%E9%85%8D%E7%BD%AE"><span class="toc-number">7.</span> <span class="toc-text">六、完成第一轮基础配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E8%AE%BE%E7%BD%AE-Logo-%E5%92%8C%E5%AF%BC%E8%88%AA%E6%A0%8F"><span class="toc-number">7.1.</span> <span class="toc-text">1. 设置 Logo 和导航栏</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E8%AE%BE%E7%BD%AE%E5%A4%B4%E5%83%8F%E5%92%8C%E7%A4%BE%E4%BA%A4%E9%93%BE%E6%8E%A5"><span class="toc-number">7.2.</span> <span class="toc-text">2. 设置头像和社交链接</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E8%AE%BE%E7%BD%AE%E9%A6%96%E9%A1%B5%E8%83%8C%E6%99%AF"><span class="toc-number">7.3.</span> <span class="toc-text">3. 设置首页背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E8%AE%BE%E7%BD%AE%E9%A6%96%E9%A1%B5%E5%89%AF%E6%A0%87%E9%A2%98"><span class="toc-number">7.4.</span> <span class="toc-text">4. 设置首页副标题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-%E8%AE%BE%E7%BD%AE%E6%96%87%E7%AB%A0%E5%8D%A1%E7%89%87%E5%B8%83%E5%B1%80"><span class="toc-number">7.5.</span> <span class="toc-text">5. 设置文章卡片布局</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-%E8%AE%BE%E7%BD%AE%E8%93%9D%E8%89%B2%E4%B8%BB%E9%A2%98"><span class="toc-number">7.6.</span> <span class="toc-text">6. 设置蓝色主题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-%E5%90%AF%E7%94%A8%E6%9A%97%E8%89%B2%E6%A8%A1%E5%BC%8F"><span class="toc-number">7.7.</span> <span class="toc-text">7. 启用暗色模式</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E5%88%9B%E5%BB%BA%E5%BD%92%E6%A1%A3%E3%80%81%E6%A0%87%E7%AD%BE%E5%92%8C%E5%88%86%E7%B1%BB%E9%A1%B5%E9%9D%A2"><span class="toc-number">8.</span> <span class="toc-text">七、创建归档、标签和分类页面</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E5%88%9B%E5%BB%BA%E5%B9%B6%E6%A3%80%E6%9F%A5%E7%AC%AC%E4%B8%80%E7%AF%87%E6%96%87%E7%AB%A0"><span class="toc-number">9.</span> <span class="toc-text">八、创建并检查第一篇文章</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%9D%E3%80%81%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E4%B8%8E-npm-%E8%84%9A%E6%9C%AC"><span class="toc-number">10.</span> <span class="toc-text">九、常用命令与 npm 脚本</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E3%80%81%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98"><span class="toc-number">11.</span> <span class="toc-text">十、常见问题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-localhost-4000-%E6%97%A0%E6%B3%95%E6%89%93%E5%BC%80"><span class="toc-number">11.1.</span> <span class="toc-text">1. localhost:4000 无法打开</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E9%A1%B5%E9%9D%A2%E6%98%BE%E7%A4%BA-Pug-%E6%BA%90%E4%BB%A3%E7%A0%81%E6%88%96%E6%A8%A1%E6%9D%BF%E6%8A%A5%E9%94%99"><span class="toc-number">11.2.</span> <span class="toc-text">2. 页面显示 Pug 源代码或模板报错</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E4%BF%AE%E6%94%B9%E9%85%8D%E7%BD%AE%E5%90%8E%E6%B2%A1%E6%9C%89%E5%8F%98%E5%8C%96"><span class="toc-number">11.3.</span> <span class="toc-text">3. 修改配置后没有变化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-YAML-%E6%8A%A5%E9%94%99"><span class="toc-number">11.4.</span> <span class="toc-text">4. YAML 报错</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-npm-%E5%AE%89%E8%A3%85%E9%80%9F%E5%BA%A6%E6%85%A2%E6%88%96%E5%A4%B1%E8%B4%A5"><span class="toc-number">11.5.</span> <span class="toc-text">5. npm 安装速度慢或失败</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E4%B8%80%E3%80%81%E4%B8%8D%E8%A6%81%E7%9B%B4%E6%8E%A5%E4%BF%AE%E6%94%B9%E8%BF%99%E4%BA%9B%E4%BD%8D%E7%BD%AE"><span class="toc-number">12.</span> <span class="toc-text">十一、不要直接修改这些位置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E4%BA%8C%E3%80%81%E4%B8%8B%E4%B8%80%E6%AD%A5%E5%81%9A%E4%BB%80%E4%B9%88"><span class="toc-number">13.</span> <span class="toc-text">十二、下一步做什么</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99%E4%B8%8E%E5%A3%B0%E6%98%8E"><span class="toc-number">14.</span> <span class="toc-text">参考资料与声明</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/07/30/hexo-butterfly-series/" title="Hexo + Butterfly 个性化博客搭建指南"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/pixiv2.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hexo + Butterfly 个性化博客搭建指南"/></a><div class="content"><a class="title" href="/2026/07/30/hexo-butterfly-series/" title="Hexo + Butterfly 个性化博客搭建指南">Hexo + Butterfly 个性化博客搭建指南</a><time datetime="2026-07-30T13:29:00.000Z" title="发表于 2026-07-30 21:29:00">2026-07-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/07/30/game-key-shield-introduction/" title="GameKeyShield：让游戏快捷键与全局热键不再冲突"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/project-covers/game-key-shield.svg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="GameKeyShield：让游戏快捷键与全局热键不再冲突"/></a><div class="content"><a class="title" href="/2026/07/30/game-key-shield-introduction/" title="GameKeyShield：让游戏快捷键与全局热键不再冲突">GameKeyShield：让游戏快捷键与全局热键不再冲突</a><time datetime="2026-07-30T02:15:46.000Z" title="发表于 2026-07-30 10:15:46">2026-07-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/07/29/tray-audio-bridge-introduction/" title="Tray Audio Bridge：把手机声音无线传到 Windows 电脑"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/tray-audio-bridge.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Tray Audio Bridge：把手机声音无线传到 Windows 电脑"/></a><div class="content"><a class="title" href="/2026/07/29/tray-audio-bridge-introduction/" title="Tray Audio Bridge：把手机声音无线传到 Windows 电脑">Tray Audio Bridge：把手机声音无线传到 Windows 电脑</a><time datetime="2026-07-29T08:37:26.000Z" title="发表于 2026-07-29 16:37:26">2026-07-29</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/07/28/hexo-category-tiles-guide/" title="为 Hexo 分类页添加全息磁贴：3D 倾斜、动态反光与明暗主题"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/6.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="为 Hexo 分类页添加全息磁贴：3D 倾斜、动态反光与明暗主题"/></a><div class="content"><a class="title" href="/2026/07/28/hexo-category-tiles-guide/" title="为 Hexo 分类页添加全息磁贴：3D 倾斜、动态反光与明暗主题">为 Hexo 分类页添加全息磁贴：3D 倾斜、动态反光与明暗主题</a><time datetime="2026-07-28T11:38:12.000Z" title="发表于 2026-07-28 19:38:12">2026-07-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/07/28/header-moment-clock-guide/" title="为博客添加一个页首时光状态组件：实时时钟、问候与今日进度"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/pixiv5.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="为博客添加一个页首时光状态组件：实时时钟、问候与今日进度"/></a><div class="content"><a class="title" href="/2026/07/28/header-moment-clock-guide/" title="为博客添加一个页首时光状态组件：实时时钟、问候与今日进度">为博客添加一个页首时光状态组件：实时时钟、问候与今日进度</a><time datetime="2026-07-28T08:44:38.000Z" title="发表于 2026-07-28 16:44:38">2026-07-28</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url(/img/banner-ocean-v2-2k.webp);"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By unmyic</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><div class="js-pjax"><script>(() => {
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = `%%{init:{ 'theme':'${theme}'}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (true) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const applyThemeDefaultsConfig = theme => {
+    if (theme === 'dark-mode') {
+      Chart.defaults.color = "rgba(255, 255, 255, 0.8)"
+      Chart.defaults.borderColor = "rgba(255, 255, 255, 0.2)"
+      Chart.defaults.scale.ticks.backdropColor = "transparent"
+    } else {
+      Chart.defaults.color = "rgba(0, 0, 0, 0.8)"
+      Chart.defaults.borderColor = "rgba(0, 0, 0, 0.1)"
+      Chart.defaults.scale.ticks.backdropColor = "transparent"
+    }
+  }
+
+  // Recursively traverse the config object and automatically apply theme-specific color schemes
+  const applyThemeConfig = (obj, theme) => {
+    if (typeof obj !== 'object' || obj === null) return
+
+    Object.keys(obj).forEach(key => {
+      const value = obj[key]
+      // If the property is an object and has theme-specific options, apply them
+      if (typeof value === 'object' && value !== null) {
+        if (value[theme]) {
+          obj[key] = value[theme] // Apply the value for the current theme
+        } else {
+          // Recursively process child objects
+          applyThemeConfig(value, theme)
+        }
+      }
+    })
+  }
+
+  const runChartJS = ele => {
+    window.loadChartJS = true
+
+    Array.from(ele).forEach((item, index) => {
+      const chartSrc = item.firstElementChild
+      const chartID = item.getAttribute('data-chartjs-id') || ('chartjs-' + index) // Use custom ID or default ID
+      const width = item.getAttribute('data-width')
+      const existingCanvas = document.getElementById(chartID)
+
+      // If a canvas already exists, remove it to avoid rendering duplicates
+      if (existingCanvas) {
+          existingCanvas.parentNode.remove()
+      }
+
+      const chartDefinition = chartSrc.textContent
+      const canvas = document.createElement('canvas')
+      canvas.id = chartID
+
+      const div = document.createElement('div')
+      div.className = 'chartjs-wrap'
+
+      if (width) {
+        div.style.width = width
+      }
+
+      div.appendChild(canvas)
+      chartSrc.insertAdjacentElement('afterend', div)
+
+      const ctx = document.getElementById(chartID).getContext('2d')
+
+      const config = JSON.parse(chartDefinition)
+
+      const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark-mode' : 'light-mode'
+
+      // Set default styles (initial setup)
+      applyThemeDefaultsConfig(theme)
+
+      // Automatically traverse the config and apply dual-mode color schemes
+      applyThemeConfig(config, theme)
+
+      new Chart(ctx, config)
+    })
+  }
+
+  const loadChartJS = () => {
+    const chartJSEle = document.querySelectorAll('#article-container .chartjs-container')
+    if (chartJSEle.length === 0) return
+
+    window.loadChartJS ? runChartJS(chartJSEle) : btf.getScript('https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js').then(() => runChartJS(chartJSEle))
+  }
+
+  // Listen for theme change events
+  btf.addGlobalFn('themeChange', loadChartJS, 'chartjs')
+  btf.addGlobalFn('encrypt', loadChartJS, 'chartjs')
+
+  window.pjax ? loadChartJS() : document.addEventListener('DOMContentLoaded', loadChartJS)
+})()</script><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const commentCount = n => {
+    const isCommentCount = document.querySelector('#post-meta .gitalk-comment-count')
+    if (isCommentCount) {
+      isCommentCount.textContent= n
+    }
+  }
+
+  const initGitalk = (el, path) => {
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGitalk = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+
+    const gitalk = new Gitalk({
+      clientID: 'Ov23liXzl5qiyvMfep1Q',
+      clientSecret: '517baaa10eea2a0b26f6e424a5a84c22db5b865f',
+      repo: 'unmyic.github.io',
+      owner: 'unmyic',
+      admin: ['unmyic'],
+      updateCountCallback: commentCount,
+      ...option,
+      id: isShuoshuo ? path : (option && option.id) || '25928ce8d904f17006e196dbe8d1f651'
+    })
+
+    gitalk.render('gitalk-container')
+  }
+
+  const loadGitalk = async(el, path) => {
+    if (typeof Gitalk === 'function') initGitalk(el, path)
+    else {
+      await btf.getCSS('https://cdn.jsdelivr.net/npm/gitalk/dist/gitalk.min.css')
+      await btf.getScript('https://cdn.jsdelivr.net/npm/gitalk/dist/gitalk.min.js')
+      initGitalk(el, path)
+    }
+  }
+
+  if (isShuoshuo) {
+    'Gitalk' === 'Gitalk'
+      ? window.shuoshuoComment = { loadComment: loadGitalk }
+      : window.loadOtherComment = loadGitalk
+    return
+  }
+
+  if ('Gitalk' === 'Gitalk' || !true) {
+    if (true) btf.loadComment(document.getElementById('gitalk-container'), loadGitalk)
+    else loadGitalk()
+  } else {
+    window.loadOtherComment = loadGitalk
+  }
+})()</script></div><script src="/js/custom-footer.js?v=3"></script><script src="/js/runtime.js?v=7"></script><script defer src="/js/hero-scroll.js?v=11"></script><script defer src="/js/post-layout-switcher.js?v=1"></script><script defer src="/js/theme-atmosphere.js?v=1"></script><script defer src="/js/category-tiles.js?v=2"></script><script defer src="/js/friend-tech-cards.js?v=3"></script><script defer src="/js/tag-constellation.js?v=1"></script><script defer src="/js/command-palette.js?v=2"></script><script defer src="/js/summary-tooltip.js?v=1"></script><script defer src="/js/toc-katex.js?v=1"></script><script defer src="/js/music-player.js?v=8"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = false;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/click-heart.min.js" async="async" mobile="false"></script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>(() => {
+  const pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => fn())
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || item.innerHTML || ""
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    if (e.request.status === 404) {
+      const usePjax = true
+      false
+        ? (usePjax ? pjax.loadUrl('/404.html') : window.location.href = '/404.html')
+        : window.location.href = e.request.responseURL
+    }
+  })
+})()</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

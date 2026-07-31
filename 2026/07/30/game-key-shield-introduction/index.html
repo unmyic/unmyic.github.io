@@ -1,0 +1,525 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>GameKeyShield：让游戏快捷键与全局热键不再冲突 | unmyic</title><meta name="author" content="unmyic,unmyic@gmail.com"><meta name="copyright" content="unmyic"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="GameKeyShield 是一款轻量的 Windows 托盘工具，可以在指定游戏和冲突应用同时运行时自动屏蔽或重映射全局快捷键，解决微信截图等热键与游戏操作冲突的问题。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="GameKeyShield：让游戏快捷键与全局热键不再冲突">
+<meta property="og:url" content="https://blog.unmyic.com/2026/07/30/game-key-shield-introduction/index.html">
+<meta property="og:site_name" content="unmyic">
+<meta property="og:description" content="GameKeyShield 是一款轻量的 Windows 托盘工具，可以在指定游戏和冲突应用同时运行时自动屏蔽或重映射全局快捷键，解决微信截图等热键与游戏操作冲突的问题。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog.unmyic.com/img/project-covers/game-key-shield.svg">
+<meta property="article:published_time" content="2026-07-30T02:15:46.000Z">
+<meta property="article:modified_time" content="2026-07-30T02:15:46.000Z">
+<meta property="article:author" content="unmyic">
+<meta property="article:tag" content="Windows">
+<meta property="article:tag" content="快捷键">
+<meta property="article:tag" content="游戏工具">
+<meta property="article:tag" content=".NET">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://blog.unmyic.com/img/project-covers/game-key-shield.svg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "GameKeyShield：让游戏快捷键与全局热键不再冲突",
+  "url": "https://blog.unmyic.com/2026/07/30/game-key-shield-introduction/",
+  "image": "https://blog.unmyic.com/img/project-covers/game-key-shield.svg",
+  "datePublished": "2026-07-30T02:15:46.000Z",
+  "dateModified": "2026-07-30T02:15:46.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "unmyic",
+      "url": "https://blog.unmyic.com/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="https://blog.unmyic.com/2026/07/30/game-key-shield-introduction/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":400,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":500,"languages":{"author":"作者: unmyic","link":"链接: ","source":"来源: unmyic","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: true,
+  islazyloadPlugin: true,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'GameKeyShield：让游戏快捷键与全局热键不再冲突',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/self/dracula.css"><link rel="stylesheet" href="/css/custom-footer.css?v=6"><link rel="stylesheet" href="/css/hero-scroll.css?v=11"><link rel="stylesheet" href="/css/post-layout-switcher.css?v=1"><link rel="stylesheet" href="/css/theme-atmosphere.css?v=1"><link rel="stylesheet" href="/css/category-tiles.css?v=3"><link rel="stylesheet" href="/css/friend-tech-cards.css?v=4"><link rel="stylesheet" href="/css/tag-constellation.css?v=1"><link rel="stylesheet" href="/css/command-palette.css?v=2"><link rel="stylesheet" href="/css/project-showcase.css?v=1"><link rel="stylesheet" href="/css/summary-tooltip.css?v=1"><link rel="stylesheet" href="/css/site-changelog.css?v=1"><link rel="stylesheet" href="/css/runtime.css?v=3"><link rel="stylesheet" href="/css/toc-katex.css?v=1"><link rel="stylesheet" href="/css/music-player.css?v=10"><meta name="generator" content="Hexo 7.3.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><script>(()=>{
+  const $loadingBox = document.getElementById('loading-box')
+  const $body = document.body
+  const preloader = {
+    endLoading: () => {
+      if ($loadingBox.classList.contains('loaded')) return
+      $body.style.overflow = ''
+      $loadingBox.classList.add('loaded')
+    },
+    initLoading: () => {
+      $body.style.overflow = 'hidden'
+      $loadingBox.classList.remove('loaded')
+    }
+  }
+
+  preloader.initLoading()
+
+  if (document.readyState === 'complete') {
+    preloader.endLoading()
+  } else {
+    window.addEventListener('load', preloader.endLoading)
+    document.addEventListener('DOMContentLoaded', preloader.endLoading)
+    // Add timeout protection: force end after 7 seconds
+    setTimeout(preloader.endLoading, 7000)
+  }
+
+  if (true) {
+    btf.addGlobalFn('pjaxSend', preloader.initLoading, 'preloader_init')
+    btf.addGlobalFn('pjaxComplete', preloader.endLoading, 'preloader_end')
+  }
+})()</script><div id="web_bg" style="background-image: url(/img/banner-ocean-v2-2k.webp);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">9</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">25</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-archive"></i><span> 文章</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-comments"></i><span> 社交</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-globe"></i><span> 网站</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/log/"><i class="fa-fw fas fa-hammer"></i><span> 日志</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/project-covers/game-key-shield.svg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/weblogo.svg" alt="Logo"></a><a class="nav-page-title" href="/"><span class="site-name">GameKeyShield：让游戏快捷键与全局热键不再冲突</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-archive"></i><span> 文章</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-comments"></i><span> 社交</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-globe"></i><span> 网站</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/log/"><i class="fa-fw fas fa-hammer"></i><span> 日志</span></a></li></ul></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">GameKeyShield：让游戏快捷键与全局热键不再冲突</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-07-30T02:15:46.000Z" title="发表于 2026-07-30 10:15:46">2026-07-30</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-07-30T02:15:46.000Z" title="更新于 2026-07-30 10:15:46">2026-07-30</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E9%A1%B9%E7%9B%AE%E5%B1%95%E7%A4%BA/">项目展示</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">1.1k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>3分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><div id="post-outdate-notice" data="{&quot;limitDay&quot;:365,&quot;messagePrev&quot;:&quot;距离本文最后更新已经&quot;,&quot;messageNext&quot;:&quot;天，部分内容可能已经过时。&quot;,&quot;postUpdate&quot;:&quot;2026-07-30 10:15:46&quot;}" hidden></div><h2 id="前言">前言</h2>
+<p>玩游戏时，一些常用按键组合可能恰好被微信、QQ 或其他后台应用注册成全局快捷键。比如游戏需要使用 <code>Alt+A</code>，微信却把它识别成截图快捷键；每按一次，游戏操作和截图功能就会同时触发。</p>
+<p>为了解决这种冲突，我制作了 <strong>GameKeyShield（游戏快捷键护盾）</strong>。它是一款常驻 Windows 系统托盘的小工具，只在指定条件满足时屏蔽或重映射快捷键，退出游戏或切回其他应用后，原来的全局快捷键会自动恢复。</p>
+<blockquote>
+<p>当前版本：<strong>GameKeyShield 1.0.2</strong></p>
+</blockquote>
+<span id="more"></span>
+<hr>
+<h2 id="它解决了什么问题">它解决了什么问题</h2>
+<p>Windows 没有提供一种公开且可靠的方法，让第三方工具判断某个全局快捷键具体属于微信、QQ 还是其他程序。同一次物理按键，也不能简单地“只发给游戏、不发给全局监听者”。</p>
+<p>GameKeyShield 使用了更稳定的处理方式：</p>
+<ul>
+<li><strong>屏蔽（Block）</strong>：完全拦截指定主键，适合只想禁用冲突快捷键的情况。</li>
+<li><strong>重映射（Remap）</strong>：把原来的主键替换成较少被占用的 <code>F13</code>–<code>F24</code>，同时保留 <code>Ctrl</code>、<code>Alt</code>、<code>Shift</code> 等修饰键。</li>
+</ul>
+<p>例如设置：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">Alt+A → 重映射 → F13<br></code></pre></td></tr></table></figure>
+<p>然后在游戏内把对应操作绑定为 <code>Alt+F13</code>。此后按下原来的 <code>Alt+A</code> 时，微信收不到 <code>A</code>，不会启动截图；游戏则会收到 <code>Alt+F13</code>，仍然可以执行预期操作。</p>
+<hr>
+<h2 id="按条件自动启用">按条件自动启用</h2>
+<p>快捷键并不会一直被屏蔽。每个配置都可以指定：</p>
+<ul>
+<li>需要保护的游戏进程</li>
+<li>发生冲突的应用进程</li>
+<li>是否仅在游戏窗口位于前台时生效</li>
+<li>一个或多个快捷键规则</li>
+<li>每条规则使用屏蔽还是重映射</li>
+</ul>
+<p>只有游戏和冲突应用处于指定状态时，规则才会开始工作。切回微信、关闭游戏或停用配置后，原有快捷键随即恢复，不需要反复手动开关。</p>
+<hr>
+<h2 id="轻量的托盘工具">轻量的托盘工具</h2>
+<p>GameKeyShield 不需要一直占据桌面。关闭主窗口后，程序会继续驻留在系统托盘中，并根据游戏状态自动启用或停用保护。</p>
+<p>它目前具备：</p>
+<ul>
+<li>多游戏配置与多条快捷键规则</li>
+<li>从当前进程列表选择冲突应用</li>
+<li>直接录入按键组合</li>
+<li>屏蔽和重映射两种操作</li>
+<li>前台游戏检测与实时状态提示</li>
+<li>开机启动和启动后隐藏</li>
+<li>配置自动保存</li>
+</ul>
+<p>程序不会注入游戏进程，不会修改游戏或聊天软件的文件，也不会连接网络。配置保存在：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">%LOCALAPPDATA%\GameKeyShield\settings.json<br></code></pre></td></tr></table></figure>
+<hr>
+<h2 id="下载与项目地址">下载与项目地址</h2>
+<div class="project-download-actions" aria-label="GameKeyShield 下载与项目链接">
+  <a class="project-action project-action-primary" href="https://github.com/unmyic/GameKeyShield/raw/refs/heads/main/dist/GameKeyShield.exe" target="_blank" rel="noopener">
+    <span class="project-action-icon"><i class="fas fa-download" aria-hidden="true"></i></span>
+    <span class="project-action-copy">
+      <strong>下载 Windows 版</strong>
+      <small>GameKeyShield.exe · v1.0.2</small>
+    </span>
+    <i class="fas fa-arrow-up-right-from-square project-action-arrow" aria-hidden="true"></i>
+  </a>
+  <a class="project-action project-action-github" href="https://github.com/unmyic/GameKeyShield" target="_blank" rel="noopener">
+    <span class="project-action-icon"><i class="fab fa-github" aria-hidden="true"></i></span>
+    <span class="project-action-copy">
+      <strong>项目主页</strong>
+      <small>使用说明、更新与问题反馈</small>
+    </span>
+    <i class="fas fa-arrow-up-right-from-square project-action-arrow" aria-hidden="true"></i>
+  </a>
+</div>
+<p>当前发布文件是轻量的 Windows x64 单文件版本，需要电脑安装 <strong>.NET 8 Desktop Runtime</strong>。</p>
+<hr>
+<h2 id="快速使用">快速使用</h2>
+<ol>
+<li>下载并运行 <code>GameKeyShield.exe</code>。</li>
+<li>添加一个游戏配置，通过“浏览”选择游戏的 <code>.exe</code>。</li>
+<li>填写发生冲突的应用进程，例如 <code>Weixin.exe, WeChat.exe</code>，也可以使用检测功能从当前进程中选择。</li>
+<li>添加快捷键规则，并选择“屏蔽”或“重映射”。</li>
+<li>如果选择重映射，建议使用游戏通常不会占用的 <code>F13</code>–<code>F24</code>。</li>
+<li>保存配置，状态变为绿色“正在保护”后规则即已生效。</li>
+</ol>
+<p>如果游戏以管理员身份运行，GameKeyShield 也需要使用管理员权限运行，否则 Windows 会阻止低权限程序拦截高权限窗口的输入。</p>
+<p>部分采用内核级反作弊或独占输入方式的游戏可能不接受软件生成的替代键。遇到这种情况时，可以改用游戏自身的按键设置，或将规则调整为纯屏蔽。</p>
+<hr>
+<h2 id="写在最后">写在最后</h2>
+<p>GameKeyShield 并不是一套复杂的键盘宏工具。它只专注于一个非常具体的问题：在游戏过程中暂时隔离冲突的全局快捷键，同时尽量保留原本的游戏操作。</p>
+<p>如果你遇到新的快捷键冲突场景，或者发现某款游戏存在兼容性问题，可以通过 GitHub Issues 提交游戏名称、冲突程序和按键组合。</p>
+<blockquote>
+<p><strong>AI 内容声明：</strong> 本文由作者提供项目资料与功能说明，并使用 AI 辅助整理和润色。</p>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://blog.unmyic.com/">unmyic</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://blog.unmyic.com/2026/07/30/game-key-shield-introduction/">https://blog.unmyic.com/2026/07/30/game-key-shield-introduction/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://blog.unmyic.com" target="_blank">unmyic</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Windows/">Windows</a><a class="post-meta__tags" href="/tags/%E5%BF%AB%E6%8D%B7%E9%94%AE/">快捷键</a><a class="post-meta__tags" href="/tags/%E6%B8%B8%E6%88%8F%E5%B7%A5%E5%85%B7/">游戏工具</a><a class="post-meta__tags" href="/tags/NET/">.NET</a></div><div class="post-share"><div class="social-share" data-image="/img/project-covers/game-key-shield.svg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/07/29/tray-audio-bridge-introduction/" title="Tray Audio Bridge：把手机声音无线传到 Windows 电脑"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/tray-audio-bridge.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Tray Audio Bridge：把手机声音无线传到 Windows 电脑</div></div><div class="info-2"><div class="info-item-1">Tray Audio Bridge 是一款常驻 Windows 系统托盘的手机音频接收工具，支持蓝牙 A2DP Sink 与加密局域网传输，让手机音乐、游戏及其他媒体声音通过电脑扬声器播放。</div></div></div></a><a class="pagination-related" href="/2026/07/30/hexo-butterfly-series/" title="Hexo + Butterfly 个性化博客搭建指南"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/pixiv2.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Hexo + Butterfly 个性化博客搭建指南</div></div><div class="info-2"><div class="info-item-1">从零安装 Hexo 与 Butterfly，逐步完成基础配置、页面美化、自定义组件和主题分离。全系列共六篇，既适合第一次搭建博客，也适合希望长期维护和形成独立设计的使用者。</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/07/29/tray-audio-bridge-introduction/" title="Tray Audio Bridge：把手机声音无线传到 Windows 电脑"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/tray-audio-bridge.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="fas fa-history fa-fw"></i> 2026-07-29</div><div class="info-item-2">Tray Audio Bridge：把手机声音无线传到 Windows 电脑</div></div><div class="info-2"><div class="info-item-1">Tray Audio Bridge 是一款常驻 Windows 系统托盘的手机音频接收工具，支持蓝牙 A2DP Sink 与加密局域网传输，让手机音乐、游戏及其他媒体声音通过电脑扬声器播放。</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="gitalk-container"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">unmyic</div><div class="author-info-description">谁终将声震人间，必长久深自缄默</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">9</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">25</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/unmyic"><i class="fab fa-github"></i><span>访问 GitHub</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/unmyic" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="/img/QR/wechat.jpg" target="_blank" title="微信二维码"><i class="fa-brands fa-weixin" style="color: #07c160;"></i></a><a class="social-icon" href="https://space.bilibili.com/3494367889197271" target="_blank" title="哔哩哔哩"><i class="fa-brands fa-bilibili" style="color: #00a1d6;"></i></a><a class="social-icon" href="mailto:unmyic@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">网站还在持续建设中</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%83%E8%A7%A3%E5%86%B3%E4%BA%86%E4%BB%80%E4%B9%88%E9%97%AE%E9%A2%98"><span class="toc-number">2.</span> <span class="toc-text">它解决了什么问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8C%89%E6%9D%A1%E4%BB%B6%E8%87%AA%E5%8A%A8%E5%90%AF%E7%94%A8"><span class="toc-number">3.</span> <span class="toc-text">按条件自动启用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BD%BB%E9%87%8F%E7%9A%84%E6%89%98%E7%9B%98%E5%B7%A5%E5%85%B7"><span class="toc-number">4.</span> <span class="toc-text">轻量的托盘工具</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8B%E8%BD%BD%E4%B8%8E%E9%A1%B9%E7%9B%AE%E5%9C%B0%E5%9D%80"><span class="toc-number">5.</span> <span class="toc-text">下载与项目地址</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BF%AB%E9%80%9F%E4%BD%BF%E7%94%A8"><span class="toc-number">6.</span> <span class="toc-text">快速使用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%99%E5%9C%A8%E6%9C%80%E5%90%8E"><span class="toc-number">7.</span> <span class="toc-text">写在最后</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/07/30/hexo-butterfly-series/" title="Hexo + Butterfly 个性化博客搭建指南"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/pixiv2.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hexo + Butterfly 个性化博客搭建指南"/></a><div class="content"><a class="title" href="/2026/07/30/hexo-butterfly-series/" title="Hexo + Butterfly 个性化博客搭建指南">Hexo + Butterfly 个性化博客搭建指南</a><time datetime="2026-07-30T13:29:00.000Z" title="发表于 2026-07-30 21:29:00">2026-07-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/07/30/game-key-shield-introduction/" title="GameKeyShield：让游戏快捷键与全局热键不再冲突"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/project-covers/game-key-shield.svg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="GameKeyShield：让游戏快捷键与全局热键不再冲突"/></a><div class="content"><a class="title" href="/2026/07/30/game-key-shield-introduction/" title="GameKeyShield：让游戏快捷键与全局热键不再冲突">GameKeyShield：让游戏快捷键与全局热键不再冲突</a><time datetime="2026-07-30T02:15:46.000Z" title="发表于 2026-07-30 10:15:46">2026-07-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/07/29/tray-audio-bridge-introduction/" title="Tray Audio Bridge：把手机声音无线传到 Windows 电脑"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/tray-audio-bridge.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Tray Audio Bridge：把手机声音无线传到 Windows 电脑"/></a><div class="content"><a class="title" href="/2026/07/29/tray-audio-bridge-introduction/" title="Tray Audio Bridge：把手机声音无线传到 Windows 电脑">Tray Audio Bridge：把手机声音无线传到 Windows 电脑</a><time datetime="2026-07-29T08:37:26.000Z" title="发表于 2026-07-29 16:37:26">2026-07-29</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/07/28/hexo-category-tiles-guide/" title="为 Hexo 分类页添加全息磁贴：3D 倾斜、动态反光与明暗主题"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/6.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="为 Hexo 分类页添加全息磁贴：3D 倾斜、动态反光与明暗主题"/></a><div class="content"><a class="title" href="/2026/07/28/hexo-category-tiles-guide/" title="为 Hexo 分类页添加全息磁贴：3D 倾斜、动态反光与明暗主题">为 Hexo 分类页添加全息磁贴：3D 倾斜、动态反光与明暗主题</a><time datetime="2026-07-28T11:38:12.000Z" title="发表于 2026-07-28 19:38:12">2026-07-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/07/28/header-moment-clock-guide/" title="为博客添加一个页首时光状态组件：实时时钟、问候与今日进度"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/pixiv5.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="为博客添加一个页首时光状态组件：实时时钟、问候与今日进度"/></a><div class="content"><a class="title" href="/2026/07/28/header-moment-clock-guide/" title="为博客添加一个页首时光状态组件：实时时钟、问候与今日进度">为博客添加一个页首时光状态组件：实时时钟、问候与今日进度</a><time datetime="2026-07-28T08:44:38.000Z" title="发表于 2026-07-28 16:44:38">2026-07-28</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url(/img/banner-ocean-v2-2k.webp);"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By unmyic</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><div class="js-pjax"><script>(() => {
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = `%%{init:{ 'theme':'${theme}'}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (true) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const applyThemeDefaultsConfig = theme => {
+    if (theme === 'dark-mode') {
+      Chart.defaults.color = "rgba(255, 255, 255, 0.8)"
+      Chart.defaults.borderColor = "rgba(255, 255, 255, 0.2)"
+      Chart.defaults.scale.ticks.backdropColor = "transparent"
+    } else {
+      Chart.defaults.color = "rgba(0, 0, 0, 0.8)"
+      Chart.defaults.borderColor = "rgba(0, 0, 0, 0.1)"
+      Chart.defaults.scale.ticks.backdropColor = "transparent"
+    }
+  }
+
+  // Recursively traverse the config object and automatically apply theme-specific color schemes
+  const applyThemeConfig = (obj, theme) => {
+    if (typeof obj !== 'object' || obj === null) return
+
+    Object.keys(obj).forEach(key => {
+      const value = obj[key]
+      // If the property is an object and has theme-specific options, apply them
+      if (typeof value === 'object' && value !== null) {
+        if (value[theme]) {
+          obj[key] = value[theme] // Apply the value for the current theme
+        } else {
+          // Recursively process child objects
+          applyThemeConfig(value, theme)
+        }
+      }
+    })
+  }
+
+  const runChartJS = ele => {
+    window.loadChartJS = true
+
+    Array.from(ele).forEach((item, index) => {
+      const chartSrc = item.firstElementChild
+      const chartID = item.getAttribute('data-chartjs-id') || ('chartjs-' + index) // Use custom ID or default ID
+      const width = item.getAttribute('data-width')
+      const existingCanvas = document.getElementById(chartID)
+
+      // If a canvas already exists, remove it to avoid rendering duplicates
+      if (existingCanvas) {
+          existingCanvas.parentNode.remove()
+      }
+
+      const chartDefinition = chartSrc.textContent
+      const canvas = document.createElement('canvas')
+      canvas.id = chartID
+
+      const div = document.createElement('div')
+      div.className = 'chartjs-wrap'
+
+      if (width) {
+        div.style.width = width
+      }
+
+      div.appendChild(canvas)
+      chartSrc.insertAdjacentElement('afterend', div)
+
+      const ctx = document.getElementById(chartID).getContext('2d')
+
+      const config = JSON.parse(chartDefinition)
+
+      const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark-mode' : 'light-mode'
+
+      // Set default styles (initial setup)
+      applyThemeDefaultsConfig(theme)
+
+      // Automatically traverse the config and apply dual-mode color schemes
+      applyThemeConfig(config, theme)
+
+      new Chart(ctx, config)
+    })
+  }
+
+  const loadChartJS = () => {
+    const chartJSEle = document.querySelectorAll('#article-container .chartjs-container')
+    if (chartJSEle.length === 0) return
+
+    window.loadChartJS ? runChartJS(chartJSEle) : btf.getScript('https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js').then(() => runChartJS(chartJSEle))
+  }
+
+  // Listen for theme change events
+  btf.addGlobalFn('themeChange', loadChartJS, 'chartjs')
+  btf.addGlobalFn('encrypt', loadChartJS, 'chartjs')
+
+  window.pjax ? loadChartJS() : document.addEventListener('DOMContentLoaded', loadChartJS)
+})()</script><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const commentCount = n => {
+    const isCommentCount = document.querySelector('#post-meta .gitalk-comment-count')
+    if (isCommentCount) {
+      isCommentCount.textContent= n
+    }
+  }
+
+  const initGitalk = (el, path) => {
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGitalk = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+
+    const gitalk = new Gitalk({
+      clientID: 'Ov23liXzl5qiyvMfep1Q',
+      clientSecret: '517baaa10eea2a0b26f6e424a5a84c22db5b865f',
+      repo: 'unmyic.github.io',
+      owner: 'unmyic',
+      admin: ['unmyic'],
+      updateCountCallback: commentCount,
+      ...option,
+      id: isShuoshuo ? path : (option && option.id) || '0f6d38465a7351c92915caa7a12daefe'
+    })
+
+    gitalk.render('gitalk-container')
+  }
+
+  const loadGitalk = async(el, path) => {
+    if (typeof Gitalk === 'function') initGitalk(el, path)
+    else {
+      await btf.getCSS('https://cdn.jsdelivr.net/npm/gitalk/dist/gitalk.min.css')
+      await btf.getScript('https://cdn.jsdelivr.net/npm/gitalk/dist/gitalk.min.js')
+      initGitalk(el, path)
+    }
+  }
+
+  if (isShuoshuo) {
+    'Gitalk' === 'Gitalk'
+      ? window.shuoshuoComment = { loadComment: loadGitalk }
+      : window.loadOtherComment = loadGitalk
+    return
+  }
+
+  if ('Gitalk' === 'Gitalk' || !true) {
+    if (true) btf.loadComment(document.getElementById('gitalk-container'), loadGitalk)
+    else loadGitalk()
+  } else {
+    window.loadOtherComment = loadGitalk
+  }
+})()</script></div><script src="/js/custom-footer.js?v=3"></script><script src="/js/runtime.js?v=7"></script><script defer src="/js/hero-scroll.js?v=11"></script><script defer src="/js/post-layout-switcher.js?v=1"></script><script defer src="/js/theme-atmosphere.js?v=1"></script><script defer src="/js/category-tiles.js?v=2"></script><script defer src="/js/friend-tech-cards.js?v=3"></script><script defer src="/js/tag-constellation.js?v=1"></script><script defer src="/js/command-palette.js?v=2"></script><script defer src="/js/summary-tooltip.js?v=1"></script><script defer src="/js/toc-katex.js?v=1"></script><script defer src="/js/music-player.js?v=8"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = false;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/click-heart.min.js" async="async" mobile="false"></script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>(() => {
+  const pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => fn())
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || item.innerHTML || ""
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    if (e.request.status === 404) {
+      const usePjax = true
+      false
+        ? (usePjax ? pjax.loadUrl('/404.html') : window.location.href = '/404.html')
+        : window.location.href = e.request.responseURL
+    }
+  })
+})()</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

@@ -1,0 +1,115 @@
+/* 网站运行信息：既支持独立页脚容器，也支持后续恢复的自定义页脚。 */
+.runtime-board {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+#footer .runtime-board--standalone {
+  width: min(1000px, calc(100% - 32px));
+  margin: 0 auto 14px;
+  text-align: center;
+}
+
+.runtime-status-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 4px;
+  font-weight: 700;
+}
+
+.runtime-status-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #7dd3fc;
+  box-shadow: 0 0 0 4px rgba(125, 211, 252, 0.14);
+}
+
+.runtime-board.is-working .runtime-status-dot {
+  background: #86efac;
+  box-shadow: 0 0 0 4px rgba(134, 239, 172, 0.14);
+}
+
+.runtime-details {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  align-items: baseline;
+  white-space: nowrap;
+}
+
+.runtime-line {
+  display: inline-flex;
+  align-items: baseline;
+}
+
+.runtime-line i {
+  width: 20px;
+  margin-right: 3px;
+  color: #93c5fd;
+  text-align: center;
+}
+
+.runtime-line strong {
+  color: #fff;
+  font-weight: 700;
+}
+
+.runtime-data-source {
+  margin-left: 6px;
+  padding: 0 5px;
+  border: 1px solid rgba(147, 197, 253, 0.36);
+  border-radius: 999px;
+  color: #bfdbfe;
+  font-size: 9px;
+  line-height: 16px;
+  vertical-align: middle;
+}
+
+.runtime-line .fa-heartbeat {
+  color: #fda4af;
+  animation: runtimeHeartbeat 1.4s ease-in-out infinite;
+}
+
+@keyframes runtimeHeartbeat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  15% {
+    transform: scale(1.18);
+  }
+  28% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.12);
+  }
+}
+
+@media (max-width: 600px) {
+  #footer .runtime-board--standalone {
+    font-size: 12px;
+  }
+
+  .runtime-details {
+    max-width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .runtime-details::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .runtime-line .fa-heartbeat {
+    animation: none;
+  }
+}

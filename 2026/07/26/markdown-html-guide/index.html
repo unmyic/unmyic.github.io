@@ -1,0 +1,787 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Markdown 与 HTML：从基础语法到博客美化 | unmyic</title><meta name="author" content="unmyic,unmyic@gmail.com"><meta name="copyright" content="unmyic"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="系统梳理 Markdown 的常用语法、它们生成的 HTML 结构，以及 Markdown 不便表达时如何使用 HTML 与 CSS，为 Hexo 博客加入提示卡片、折叠内容、按钮、进度条和响应式布局。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Markdown 与 HTML：从基础语法到博客美化">
+<meta property="og:url" content="https://blog.unmyic.com/2026/07/26/markdown-html-guide/index.html">
+<meta property="og:site_name" content="unmyic">
+<meta property="og:description" content="系统梳理 Markdown 的常用语法、它们生成的 HTML 结构，以及 Markdown 不便表达时如何使用 HTML 与 CSS，为 Hexo 博客加入提示卡片、折叠内容、按钮、进度条和响应式布局。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog.unmyic.com/img/post-covers/9.jpg">
+<meta property="article:published_time" content="2026-07-26T07:26:10.000Z">
+<meta property="article:modified_time" content="2026-07-28T09:08:29.373Z">
+<meta property="article:author" content="unmyic">
+<meta property="article:tag" content="Hexo">
+<meta property="article:tag" content="CSS">
+<meta property="article:tag" content="Markdown">
+<meta property="article:tag" content="HTML">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://blog.unmyic.com/img/post-covers/9.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Markdown 与 HTML：从基础语法到博客美化",
+  "url": "https://blog.unmyic.com/2026/07/26/markdown-html-guide/",
+  "image": "https://blog.unmyic.com/img/post-covers/9.jpg",
+  "datePublished": "2026-07-26T07:26:10.000Z",
+  "dateModified": "2026-07-28T09:08:29.373Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "unmyic",
+      "url": "https://blog.unmyic.com/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="https://blog.unmyic.com/2026/07/26/markdown-html-guide/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":400,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":500,"languages":{"author":"作者: unmyic","link":"链接: ","source":"来源: unmyic","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: true,
+  islazyloadPlugin: true,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Markdown 与 HTML：从基础语法到博客美化',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/self/dracula.css"><link rel="stylesheet" href="/css/custom-footer.css?v=6"><link rel="stylesheet" href="/css/hero-scroll.css?v=11"><link rel="stylesheet" href="/css/post-layout-switcher.css?v=1"><link rel="stylesheet" href="/css/theme-atmosphere.css?v=1"><link rel="stylesheet" href="/css/category-tiles.css?v=3"><link rel="stylesheet" href="/css/friend-tech-cards.css?v=4"><link rel="stylesheet" href="/css/tag-constellation.css?v=1"><link rel="stylesheet" href="/css/command-palette.css?v=2"><link rel="stylesheet" href="/css/project-showcase.css?v=1"><link rel="stylesheet" href="/css/summary-tooltip.css?v=1"><link rel="stylesheet" href="/css/site-changelog.css?v=1"><link rel="stylesheet" href="/css/runtime.css?v=3"><link rel="stylesheet" href="/css/toc-katex.css?v=1"><link rel="stylesheet" href="/css/music-player.css?v=10"><meta name="generator" content="Hexo 7.3.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><script>(()=>{
+  const $loadingBox = document.getElementById('loading-box')
+  const $body = document.body
+  const preloader = {
+    endLoading: () => {
+      if ($loadingBox.classList.contains('loaded')) return
+      $body.style.overflow = ''
+      $loadingBox.classList.add('loaded')
+    },
+    initLoading: () => {
+      $body.style.overflow = 'hidden'
+      $loadingBox.classList.remove('loaded')
+    }
+  }
+
+  preloader.initLoading()
+
+  if (document.readyState === 'complete') {
+    preloader.endLoading()
+  } else {
+    window.addEventListener('load', preloader.endLoading)
+    document.addEventListener('DOMContentLoaded', preloader.endLoading)
+    // Add timeout protection: force end after 7 seconds
+    setTimeout(preloader.endLoading, 7000)
+  }
+
+  if (true) {
+    btf.addGlobalFn('pjaxSend', preloader.initLoading, 'preloader_init')
+    btf.addGlobalFn('pjaxComplete', preloader.endLoading, 'preloader_end')
+  }
+})()</script><div id="web_bg" style="background-image: url(/img/banner-ocean-v2-2k.webp);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">9</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">25</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-archive"></i><span> 文章</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-comments"></i><span> 社交</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-globe"></i><span> 网站</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/log/"><i class="fa-fw fas fa-hammer"></i><span> 日志</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/post-covers/9.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/weblogo.svg" alt="Logo"></a><a class="nav-page-title" href="/"><span class="site-name">Markdown 与 HTML：从基础语法到博客美化</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-archive"></i><span> 文章</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-comments"></i><span> 社交</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-globe"></i><span> 网站</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/log/"><i class="fa-fw fas fa-hammer"></i><span> 日志</span></a></li></ul></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Markdown 与 HTML：从基础语法到博客美化</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-07-26T07:26:10.000Z" title="发表于 2026-07-26 15:26:10">2026-07-26</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-07-28T09:08:29.373Z" title="更新于 2026-07-28 17:08:29">2026-07-28</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Web-%E5%BC%80%E5%8F%91/">Web 开发</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">3.4k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>14分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><div id="post-outdate-notice" data="{&quot;limitDay&quot;:365,&quot;messagePrev&quot;:&quot;距离本文最后更新已经&quot;,&quot;messageNext&quot;:&quot;天，部分内容可能已经过时。&quot;,&quot;postUpdate&quot;:&quot;2026-07-28 17:08:29&quot;}" hidden></div><h2 id="前言">前言</h2>
+<p>Markdown 和 HTML 并不是互相竞争的两种语言。</p>
+<ul>
+<li><strong>Markdown</strong> 负责让我们用简单、易读的纯文本快速写作。</li>
+<li><strong>HTML</strong> 负责描述网页内容的结构和语义。</li>
+<li><strong>CSS</strong> 决定这些结构最终呈现出来的颜色、间距、圆角和动画。</li>
+<li><strong>JavaScript</strong> 则负责更复杂的交互行为。</li>
+</ul>
+<p>在 Hexo 中，我们写下的 Markdown 会在构建时被渲染器转换成 HTML，浏览器最终读取的仍然是 HTML。因此，理解两者之间的对应关系，可以帮助我们判断什么时候使用 Markdown，什么时候直接写 HTML。</p>
+<blockquote>
+<p>推荐原则：正文优先使用 Markdown；只有在需要特殊结构或样式时才使用 HTML，并把可复用的外观交给 CSS。</p>
+</blockquote>
+<hr>
+<h2 id="一、Markdown-是怎样变成-HTML-的">一、Markdown 是怎样变成 HTML 的</h2>
+<p>以下 Markdown：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs markdown"><span class="hljs-section">## 欢迎来到我的博客</span><br><br>这里有一段包含 <span class="hljs-strong">**重点内容**</span> 和 [<span class="hljs-string">链接</span>](<span class="hljs-link">https://example.com</span>) 的文字。<br></code></pre></td></tr></table></figure>
+<p>构建后大致会得到：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">h2</span>&gt;</span>欢迎来到我的博客<span class="hljs-tag">&lt;/<span class="hljs-name">h2</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span><br>  这里有一段包含 <span class="hljs-tag">&lt;<span class="hljs-name">strong</span>&gt;</span>重点内容<span class="hljs-tag">&lt;/<span class="hljs-name">strong</span>&gt;</span><br>  和 <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;https://example.com&quot;</span>&gt;</span>链接<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span> 的文字。<br><span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<p>浏览器不认识 Markdown 中的 <code>##</code> 或 <code>**</code>，它真正识别的是 <code>&lt;h2&gt;</code>、<code>&lt;p&gt;</code>、<code>&lt;strong&gt;</code> 等 HTML 标签。</p>
+<hr>
+<h2 id="二、常用-Markdown-与-HTML-对照">二、常用 Markdown 与 HTML 对照</h2>
+<table>
+<thead>
+<tr>
+<th>内容</th>
+<th>Markdown</th>
+<th>对应的 HTML</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>一级标题</td>
+<td><code># 标题</code></td>
+<td><code>&lt;h1&gt;标题&lt;/h1&gt;</code></td>
+</tr>
+<tr>
+<td>二级标题</td>
+<td><code>## 标题</code></td>
+<td><code>&lt;h2&gt;标题&lt;/h2&gt;</code></td>
+</tr>
+<tr>
+<td>段落</td>
+<td>空行分隔文本</td>
+<td><code>&lt;p&gt;文本&lt;/p&gt;</code></td>
+</tr>
+<tr>
+<td>换行</td>
+<td>行末两个空格或 <code>&lt;br&gt;</code></td>
+<td><code>&lt;br&gt;</code></td>
+</tr>
+<tr>
+<td>粗体</td>
+<td><code>**文字**</code></td>
+<td><code>&lt;strong&gt;文字&lt;/strong&gt;</code></td>
+</tr>
+<tr>
+<td>斜体</td>
+<td><code>*文字*</code></td>
+<td><code>&lt;em&gt;文字&lt;/em&gt;</code></td>
+</tr>
+<tr>
+<td>删除线</td>
+<td><code>~~文字~~</code></td>
+<td><code>&lt;del&gt;文字&lt;/del&gt;</code></td>
+</tr>
+<tr>
+<td>行内代码</td>
+<td><code>`代码`</code></td>
+<td><code>&lt;code&gt;代码&lt;/code&gt;</code></td>
+</tr>
+<tr>
+<td>链接</td>
+<td><code>[名称](地址)</code></td>
+<td><code>&lt;a href=&quot;地址&quot;&gt;名称&lt;/a&gt;</code></td>
+</tr>
+<tr>
+<td>图片</td>
+<td><code>![说明](地址)</code></td>
+<td><code>&lt;img src=&quot;地址&quot; alt=&quot;说明&quot;&gt;</code></td>
+</tr>
+<tr>
+<td>引用</td>
+<td><code>&gt; 内容</code></td>
+<td><code>&lt;blockquote&gt;内容&lt;/blockquote&gt;</code></td>
+</tr>
+<tr>
+<td>分隔线</td>
+<td><code>---</code></td>
+<td><code>&lt;hr&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="1-标题">1. 标题</h3>
+<p>Markdown 使用 <code>#</code> 的数量表示标题层级：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs markdown"><span class="hljs-section"># 一级标题</span><br><span class="hljs-section">## 二级标题</span><br><span class="hljs-section">### 三级标题</span><br><span class="hljs-section">#### 四级标题</span><br></code></pre></td></tr></table></figure>
+<p>对应 HTML：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>一级标题<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">h2</span>&gt;</span>二级标题<span class="hljs-tag">&lt;/<span class="hljs-name">h2</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">h3</span>&gt;</span>三级标题<span class="hljs-tag">&lt;/<span class="hljs-name">h3</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">h4</span>&gt;</span>四级标题<span class="hljs-tag">&lt;/<span class="hljs-name">h4</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<p>一篇文章通常只有页面标题使用一级标题，正文建议从二级标题开始，这样目录结构更清晰。</p>
+<h3 id="2-段落与换行">2. 段落与换行</h3>
+<p>Markdown 中用一个空行分隔段落：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs markdown">这是第一个段落。<br><br>这是第二个段落。<br></code></pre></td></tr></table></figure>
+<p>对应 HTML：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>这是第一个段落。<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>这是第二个段落。<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<p>如果只需要在同一段内换行，可以使用 <code>&lt;br&gt;</code>。不要为了制造间距连续写很多 <code>&lt;br&gt;</code>，段落间距更适合交给 CSS 的 <code>margin</code> 控制。</p>
+<h3 id="3-强调文字">3. 强调文字</h3>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs markdown"><span class="hljs-strong">**粗体**</span><br><span class="hljs-emphasis">*斜体*</span><br><span class="hljs-strong">**<span class="hljs-emphasis">*粗斜体*</span>**</span><br>~~删除线~~<br></code></pre></td></tr></table></figure>
+<p>对应 HTML：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">strong</span>&gt;</span>粗体<span class="hljs-tag">&lt;/<span class="hljs-name">strong</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">em</span>&gt;</span>斜体<span class="hljs-tag">&lt;/<span class="hljs-name">em</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">strong</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">em</span>&gt;</span>粗斜体<span class="hljs-tag">&lt;/<span class="hljs-name">em</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">strong</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">del</span>&gt;</span>删除线<span class="hljs-tag">&lt;/<span class="hljs-name">del</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<p>实际效果：<strong>粗体</strong> <em>斜体</em> <em><strong>粗斜体</strong></em> <s>删除线</s></p>
+<p><code>strong</code> 和 <code>em</code> 不只是改变外观，也分别表达“重要”和“强调”的语义。</p>
+<h3 id="4-链接与图片">4. 链接与图片</h3>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs markdown">[<span class="hljs-string">访问我的 GitHub</span>](<span class="hljs-link">https://github.com/unmyic</span>)<br><br>![<span class="hljs-string">图片说明</span>](<span class="hljs-link">/img/avatar.png</span>)<br></code></pre></td></tr></table></figure>
+<p>对应 HTML：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;https://github.com/unmyic&quot;</span>&gt;</span>访问我的 GitHub<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;/img/avatar.png&quot;</span> <span class="hljs-attr">alt</span>=<span class="hljs-string">&quot;图片说明&quot;</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<p>HTML 可以增加 Markdown 不方便提供的属性：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;https://github.com/unmyic&quot;</span></span><br><span class="hljs-tag">   <span class="hljs-attr">target</span>=<span class="hljs-string">&quot;_blank&quot;</span></span><br><span class="hljs-tag">   <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;noopener noreferrer&quot;</span>&gt;</span><br>  在新标签页打开 GitHub<br><span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span><br><br><span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;/img/avatar.png&quot;</span></span><br><span class="hljs-tag">     <span class="hljs-attr">alt</span>=<span class="hljs-string">&quot;网站头像&quot;</span></span><br><span class="hljs-tag">     <span class="hljs-attr">width</span>=<span class="hljs-string">&quot;160&quot;</span></span><br><span class="hljs-tag">     <span class="hljs-attr">loading</span>=<span class="hljs-string">&quot;lazy&quot;</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<p>其中 <code>alt</code> 有助于无障碍阅读，也能在图片加载失败时说明图片内容。</p>
+<h3 id="5-列表">5. 列表</h3>
+<p>无序列表：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs markdown"><span class="hljs-bullet">-</span> HTML<br><span class="hljs-bullet">-</span> CSS<br><span class="hljs-bullet">-</span> JavaScript<br></code></pre></td></tr></table></figure>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span>HTML<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span>CSS<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span>JavaScript<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<p>有序列表：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs markdown"><span class="hljs-bullet">1.</span> 编写文章<br><span class="hljs-bullet">2.</span> 本地预览<br><span class="hljs-bullet">3.</span> 生成并部署<br></code></pre></td></tr></table></figure>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">ol</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span>编写文章<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span>本地预览<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span>生成并部署<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">ol</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<p>任务列表属于常见的 GFM（GitHub Flavored Markdown）扩展：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs markdown"><span class="hljs-bullet">-</span> [x] 完成博客搭建<br><span class="hljs-bullet">-</span> [x] 调整主题<br><span class="hljs-bullet">-</span> [ ] 继续更新文章<br></code></pre></td></tr></table></figure>
+<ul>
+<li>[x] 完成博客搭建</li>
+<li>[x] 调整主题</li>
+<li>[ ] 继续更新文章</li>
+</ul>
+<h3 id="6-引用">6. 引用</h3>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs markdown"><span class="hljs-quote">&gt; 我们塑造了工具，此后工具又塑造了我们。</span><br><span class="hljs-quote">&gt;</span><br><span class="hljs-quote">&gt; 引用中也可以包含多个段落。</span><br></code></pre></td></tr></table></figure>
+<p>对应 HTML：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">blockquote</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>我们塑造了工具，此后工具又塑造了我们。<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>引用中也可以包含多个段落。<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">blockquote</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<h3 id="7-代码">7. 代码</h3>
+<p>行内代码：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs markdown">使用 <span class="hljs-code">`hexo generate`</span> 生成静态页面。<br></code></pre></td></tr></table></figure>
+<p>代码块：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs markdown"><span class="hljs-code">```javascript</span><br><span class="hljs-code">const message = &#x27;Hello, world!&#x27;;</span><br><span class="hljs-code">console.log(message);</span><br><span class="hljs-code">```</span><br></code></pre></td></tr></table></figure>
+<p>对应 HTML 的核心结构是：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">pre</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">code</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;language-javascript&quot;</span>&gt;</span><br>const message = &#x27;Hello, world!&#x27;;<br>console.log(message);<br><span class="hljs-tag">&lt;/<span class="hljs-name">code</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">pre</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<p>代码围栏后的语言名称会帮助高亮插件选择正确的语法规则。</p>
+<h3 id="8-表格">8. 表格</h3>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs markdown">| 技术 | 作用 |<br>| --- | --- |<br>| HTML | 描述结构 |<br>| CSS | 控制样式 |<br>| JavaScript | 实现交互 |<br></code></pre></td></tr></table></figure>
+<p>对应 HTML 会包含 <code>&lt;table&gt;</code>、<code>&lt;thead&gt;</code>、<code>&lt;tbody&gt;</code>、<code>&lt;tr&gt;</code>、<code>&lt;th&gt;</code> 和 <code>&lt;td&gt;</code> 等标签。HTML 表格还能使用 <code>rowspan</code>、<code>colspan</code> 合并单元格，这是普通 Markdown 表格不方便做到的。</p>
+<h3 id="9-转义特殊字符">9. 转义特殊字符</h3>
+<p>如果希望显示 Markdown 符号本身，可以在前面添加反斜杠：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs markdown">\<span class="hljs-emphasis">*这段文字不会变成斜体\*</span><br>\# 这也不会成为标题<br></code></pre></td></tr></table></figure>
+<p>HTML 中的 <code>&lt;</code>、<code>&gt;</code> 和 <code>&amp;</code> 通常分别写成 <code>&amp;lt;</code>、<code>&amp;gt;</code> 和 <code>&amp;amp;</code>，避免它们被误认为标签或实体。</p>
+<hr>
+<h2 id="三、HTML-能补充哪些功能">三、HTML 能补充哪些功能</h2>
+<p>Markdown 擅长文章结构，但原生 HTML 提供了更多语义化组件。</p>
+<h3 id="1-折叠内容">1. 折叠内容</h3>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">details</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">summary</span>&gt;</span>点击查看答案<span class="hljs-tag">&lt;/<span class="hljs-name">summary</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>这里是默认隐藏的内容。<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">details</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<p>实际效果：</p>
+<details>
+  <summary>点击查看答案</summary>
+  <p>这里是默认隐藏的内容，不需要 JavaScript 就能展开和收起。</p>
+</details>
+<h3 id="2-高亮、上下标和键盘按键">2. 高亮、上下标和键盘按键</h3>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">mark</span>&gt;</span>高亮文字<span class="hljs-tag">&lt;/<span class="hljs-name">mark</span>&gt;</span><br>H<span class="hljs-tag">&lt;<span class="hljs-name">sub</span>&gt;</span>2<span class="hljs-tag">&lt;/<span class="hljs-name">sub</span>&gt;</span>O<br>x<span class="hljs-tag">&lt;<span class="hljs-name">sup</span>&gt;</span>2<span class="hljs-tag">&lt;/<span class="hljs-name">sup</span>&gt;</span><br>按下 <span class="hljs-tag">&lt;<span class="hljs-name">kbd</span>&gt;</span>Ctrl<span class="hljs-tag">&lt;/<span class="hljs-name">kbd</span>&gt;</span> + <span class="hljs-tag">&lt;<span class="hljs-name">kbd</span>&gt;</span>S<span class="hljs-tag">&lt;/<span class="hljs-name">kbd</span>&gt;</span> 保存<br></code></pre></td></tr></table></figure>
+<p>实际效果：</p>
+<p><mark>高亮文字</mark>、H<sub>2</sub>O、x<sup>2</sup>，按下 <kbd>Ctrl</kbd> + <kbd>S</kbd> 保存。</p>
+<h3 id="3-缩写、时间和注音">3. 缩写、时间和注音</h3>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">abbr</span> <span class="hljs-attr">title</span>=<span class="hljs-string">&quot;HyperText Markup Language&quot;</span>&gt;</span>HTML<span class="hljs-tag">&lt;/<span class="hljs-name">abbr</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">time</span> <span class="hljs-attr">datetime</span>=<span class="hljs-string">&quot;2026-07-26&quot;</span>&gt;</span>2026 年 7 月 26 日<span class="hljs-tag">&lt;/<span class="hljs-name">time</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">ruby</span>&gt;</span>语<span class="hljs-tag">&lt;<span class="hljs-name">rt</span>&gt;</span>yǔ<span class="hljs-tag">&lt;/<span class="hljs-name">rt</span>&gt;</span>法<span class="hljs-tag">&lt;<span class="hljs-name">rt</span>&gt;</span>fǎ<span class="hljs-tag">&lt;/<span class="hljs-name">rt</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">ruby</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<p>实际效果：</p>
+<p><abbr title="HyperText Markup Language">HTML</abbr>、 <time datetime="2026-07-26">2026 年 7 月 26 日</time> 、<ruby>语<rt>yǔ</rt>法<rt>fǎ</rt></ruby></p>
+<p>这些标签不仅改变显示方式，也能让机器和辅助阅读设备更准确地理解内容。</p>
+<h3 id="4-图片说明">4. 图片说明</h3>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">figure</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;/img/banner-ocean-v2-2k.webp&quot;</span></span><br><span class="hljs-tag">       <span class="hljs-attr">alt</span>=<span class="hljs-string">&quot;海边背景&quot;</span></span><br><span class="hljs-tag">       <span class="hljs-attr">loading</span>=<span class="hljs-string">&quot;lazy&quot;</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">figcaption</span>&gt;</span>为博客设计的海边背景图<span class="hljs-tag">&lt;/<span class="hljs-name">figcaption</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">figure</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<p><code>figure</code> 和 <code>figcaption</code> 可以把图片、图表或代码示例与说明文字组成一个完整单元。</p>
+<h3 id="5-原生进度与度量">5. 原生进度与度量</h3>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">label</span>&gt;</span><br>  文章完成进度：<br>  <span class="hljs-tag">&lt;<span class="hljs-name">progress</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;75&quot;</span> <span class="hljs-attr">max</span>=<span class="hljs-string">&quot;100&quot;</span>&gt;</span>75%<span class="hljs-tag">&lt;/<span class="hljs-name">progress</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span><br><br><span class="hljs-tag">&lt;<span class="hljs-name">meter</span> <span class="hljs-attr">min</span>=<span class="hljs-string">&quot;0&quot;</span> <span class="hljs-attr">max</span>=<span class="hljs-string">&quot;100&quot;</span> <span class="hljs-attr">low</span>=<span class="hljs-string">&quot;40&quot;</span> <span class="hljs-attr">high</span>=<span class="hljs-string">&quot;80&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;86&quot;</span>&gt;</span>86<span class="hljs-tag">&lt;/<span class="hljs-name">meter</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<p>实际效果：</p>
+<label>
+  文章完成进度：
+  <progress value="75" max="100">75%</progress>
+</label>
+<hr>
+<h2 id="四、用-HTML-与-CSS-制作美化组件">四、用 HTML 与 CSS 制作美化组件</h2>
+<p>HTML 决定组件里有什么，CSS 决定组件长什么样。下面是一组无需 JavaScript 的文章提示卡片。</p>
+<h3 id="HTML">HTML</h3>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">aside</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;article-callout article-callout--tip&quot;</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;article-callout__icon&quot;</span>&gt;</span>✦<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">strong</span>&gt;</span>写作提示<span class="hljs-tag">&lt;/<span class="hljs-name">strong</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>优先使用语义清晰的结构，样式可以随时调整。<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span><br>  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">aside</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<h3 id="CSS">CSS</h3>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs css"><span class="hljs-selector-class">.article-callout</span> &#123;<br>  <span class="hljs-attribute">display</span>: flex;<br>  <span class="hljs-attribute">gap</span>: <span class="hljs-number">12px</span>;<br>  <span class="hljs-attribute">padding</span>: <span class="hljs-number">16px</span> <span class="hljs-number">18px</span>;<br>  <span class="hljs-attribute">border</span>: <span class="hljs-number">1px</span> solid <span class="hljs-built_in">rgba</span>(<span class="hljs-number">59</span>, <span class="hljs-number">130</span>, <span class="hljs-number">246</span>, <span class="hljs-number">0.25</span>);<br>  <span class="hljs-attribute">border-radius</span>: <span class="hljs-number">14px</span>;<br>  <span class="hljs-attribute">background</span>: <span class="hljs-built_in">rgba</span>(<span class="hljs-number">59</span>, <span class="hljs-number">130</span>, <span class="hljs-number">246</span>, <span class="hljs-number">0.08</span>);<br>&#125;<br><br><span class="hljs-selector-class">.article-callout__icon</span> &#123;<br>  <span class="hljs-attribute">color</span>: <span class="hljs-number">#3b82f6</span>;<br>  <span class="hljs-attribute">font-size</span>: <span class="hljs-number">22px</span>;<br>&#125;<br><br><span class="hljs-selector-class">.article-callout</span> <span class="hljs-selector-tag">p</span> &#123;<br>  <span class="hljs-attribute">margin</span>: <span class="hljs-number">4px</span> <span class="hljs-number">0</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>实际效果：</p>
+<style>
+.md-HTML-demo-callout {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin: 18px 0;
+  padding: 16px 18px;
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  border-radius: 14px;
+  background: rgba(59, 130, 246, 0.08);
+}
+.md-HTML-demo-callout__icon {
+  color: #3b82f6;
+  font-size: 22px;
+  line-height: 1.25;
+}
+.md-HTML-demo-callout p {
+  margin: 4px 0 0;
+}
+.md-HTML-demo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 18px 0;
+}
+.md-HTML-demo-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 16px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #60a5fa, #2563eb);
+  box-shadow: 0 7px 18px rgba(37, 99, 235, 0.24);
+  color: #fff !important;
+  text-decoration: none !important;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.md-HTML-demo-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.34);
+}
+[data-theme='dark'] .md-HTML-demo-callout {
+  border-color: rgba(96, 165, 250, 0.28);
+  background: rgba(96, 165, 250, 0.1);
+}
+</style>
+<aside class="md-HTML-demo-callout">
+  <div class="md-HTML-demo-callout__icon">✦</div>
+  <div>
+    <strong>写作提示</strong>
+    <p>优先使用语义清晰的结构，样式可以随时调整。</p>
+  </div>
+</aside>
+<p>同一个链接也可以通过 CSS 变成按钮：</p>
+<div class="md-HTML-demo-actions">
+  <a class="md-HTML-demo-button" href="https://github.com/unmyic" target="_blank" rel="noopener noreferrer">
+    访问 GitHub
+  </a>
+</div>
+<p>这里仍然使用 <code>&lt;a&gt;</code> 而不是 <code>&lt;button&gt;</code>，因为它的行为是“跳转到另一个页面”。HTML 标签应当根据功能选择，而不只是根据外观选择。</p>
+<hr>
+<h2 id="五、常见-HTML-美化思路">五、常见 HTML 美化思路</h2>
+<h3 id="1-使用-class，不要复制大量行内样式">1. 使用 class，不要复制大量行内样式</h3>
+<p>不推荐：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">style</span>=<span class="hljs-string">&quot;color: blue; padding: 10px; border-radius: 8px;&quot;</span>&gt;</span><br>  一段文字<br><span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<p>更推荐：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;notice-text&quot;</span>&gt;</span>一段文字<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs css"><span class="hljs-selector-class">.notice-text</span> &#123;<br>  <span class="hljs-attribute">padding</span>: <span class="hljs-number">10px</span>;<br>  <span class="hljs-attribute">border-radius</span>: <span class="hljs-number">8px</span>;<br>  <span class="hljs-attribute">color</span>: <span class="hljs-number">#2563eb</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>这样修改一次 CSS，就能统一更新所有使用该 class 的内容。</p>
+<h3 id="2-使用-CSS-变量统一主题色">2. 使用 CSS 变量统一主题色</h3>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs css"><span class="hljs-selector-pseudo">:root</span> &#123;<br>  <span class="hljs-attr">--accent-color</span>: <span class="hljs-number">#3b82f6</span>;<br>  <span class="hljs-attr">--accent-soft</span>: <span class="hljs-built_in">rgba</span>(<span class="hljs-number">59</span>, <span class="hljs-number">130</span>, <span class="hljs-number">246</span>, <span class="hljs-number">0.1</span>);<br>&#125;<br><br><span class="hljs-selector-class">.notice-text</span> &#123;<br>  <span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--accent-color);<br>  <span class="hljs-attribute">background</span>: <span class="hljs-built_in">var</span>(--accent-soft);<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>如果以后更换网站主题色，只需要修改变量。</p>
+<h3 id="3-同时考虑暗色主题">3. 同时考虑暗色主题</h3>
+<p>Butterfly 会在暗色模式下给根节点添加 <code>data-theme=&quot;dark&quot;</code>，可以这样覆盖：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs css"><span class="hljs-selector-attr">[data-theme=<span class="hljs-string">&#x27;dark&#x27;</span>]</span> <span class="hljs-selector-class">.notice-text</span> &#123;<br>  <span class="hljs-attribute">color</span>: <span class="hljs-number">#93c5fd</span>;<br>  <span class="hljs-attribute">background</span>: <span class="hljs-built_in">rgba</span>(<span class="hljs-number">96</span>, <span class="hljs-number">165</span>, <span class="hljs-number">250</span>, <span class="hljs-number">0.12</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="4-为手机端添加响应式规则">4. 为手机端添加响应式规则</h3>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs css"><span class="hljs-selector-class">.two-column-layout</span> &#123;<br>  <span class="hljs-attribute">display</span>: grid;<br>  <span class="hljs-attribute">grid-template-columns</span>: <span class="hljs-number">1</span>fr <span class="hljs-number">1</span>fr;<br>  <span class="hljs-attribute">gap</span>: <span class="hljs-number">20px</span>;<br>&#125;<br><br><span class="hljs-keyword">@media</span> (<span class="hljs-attribute">max-width</span>: <span class="hljs-number">768px</span>) &#123;<br>  <span class="hljs-selector-class">.two-column-layout</span> &#123;<br>    <span class="hljs-attribute">grid-template-columns</span>: <span class="hljs-number">1</span>fr;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>桌面端显示两列，手机端会自动变为一列。</p>
+<h3 id="5-尊重“减少动态效果”设置">5. 尊重“减少动态效果”设置</h3>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs css"><span class="hljs-selector-class">.floating-card</span> &#123;<br>  <span class="hljs-attribute">transition</span>: transform .<span class="hljs-number">25s</span> ease;<br>&#125;<br><br><span class="hljs-keyword">@media</span> (<span class="hljs-attribute">prefers-reduced-motion</span>: reduce) &#123;<br>  <span class="hljs-selector-class">.floating-card</span> &#123;<br>    <span class="hljs-attribute">transition</span>: none;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>这可以减少动画给部分访客带来的不适。</p>
+<hr>
+<h2 id="六、在-Hexo-博客中应该写在哪里">六、在 Hexo 博客中应该写在哪里</h2>
+<h3 id="1-只属于一篇文章的结构">1. 只属于一篇文章的结构</h3>
+<p>直接写在该文章的 Markdown 文件中：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">source/_posts/文章名称.md<br></code></pre></td></tr></table></figure>
+<p>Markdown 与少量 HTML 可以混合书写。</p>
+<h3 id="2-多篇文章都会使用的样式">2. 多篇文章都会使用的样式</h3>
+<p>建议放进独立 CSS 文件：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">source/css/custom-article.css<br></code></pre></td></tr></table></figure>
+<p>然后在 Butterfly 配置的 <code>inject.head</code> 中引入：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">inject:</span><br>  <span class="hljs-attr">head:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-string">&lt;link</span> <span class="hljs-string">rel=&quot;stylesheet&quot;</span> <span class="hljs-string">href=&quot;/css/custom-article.css&quot;&gt;</span><br></code></pre></td></tr></table></figure>
+<h3 id="3-需要交互行为的组件">3. 需要交互行为的组件</h3>
+<p>JavaScript 文件可以放在：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">source/js/custom-component.js<br></code></pre></td></tr></table></figure>
+<p>再通过 <code>inject.bottom</code> 引入：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">inject:</span><br>  <span class="hljs-attr">bottom:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-string">&lt;script</span> <span class="hljs-string">defer</span> <span class="hljs-string">src=&quot;/js/custom-component.js&quot;&gt;&lt;/script&gt;</span><br></code></pre></td></tr></table></figure>
+<h3 id="4-图片和附件">4. 图片和附件</h3>
+<p>全站通用资源可以放在：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs text">source/img/<br>source/downloads/<br></code></pre></td></tr></table></figure>
+<p>文章中分别使用 <code>/img/文件名</code> 和 <code>/downloads/文件名</code> 访问。</p>
+<hr>
+<h2 id="七、容易遇到的问题">七、容易遇到的问题</h2>
+<h3 id="HTML-被显示成普通文字">HTML 被显示成普通文字</h3>
+<p>先确认 HTML 没有放在代码围栏中。代码围栏里的内容只用于展示源码，不会被浏览器执行：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs markdown"><span class="hljs-code">```html</span><br><span class="hljs-code">&lt;strong&gt;这里只会展示代码&lt;/strong&gt;</span><br><span class="hljs-code">```</span><br></code></pre></td></tr></table></figure>
+<p>如果要真正渲染，就不要添加代码围栏。例如，下面这行在 Markdown 源文件中直接使用了 <code>&lt;strong&gt;</code> 标签：</p>
+<p><strong>这里会被渲染为粗体，而不是代码。</strong></p>
+<p>部分 Markdown 渲染器会出于安全考虑禁用原始 HTML，这时还需要检查渲染器的 <code>html</code>、<code>sanitize</code> 或 <code>dompurify</code> 配置。</p>
+<h3 id="标签嵌套错误">标签嵌套错误</h3>
+<p>HTML 标签通常需要成对闭合，并按相反顺序结束：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-comment">&lt;!-- 正确 --&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">strong</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">em</span>&gt;</span>文字<span class="hljs-tag">&lt;/<span class="hljs-name">em</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">strong</span>&gt;</span><br><br><span class="hljs-comment">&lt;!-- 错误 --&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">strong</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">em</span>&gt;</span>文字<span class="hljs-tag">&lt;/<span class="hljs-name">strong</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">em</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<h3 id="样式影响了整个网站">样式影响了整个网站</h3>
+<p>避免使用过于宽泛的选择器：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs css"><span class="hljs-comment">/* 可能改变全站所有段落 */</span><br><span class="hljs-selector-tag">p</span> &#123;<br>  <span class="hljs-attribute">color</span>: blue;<br>&#125;<br><br><span class="hljs-comment">/* 只改变指定组件里的段落 */</span><br><span class="hljs-selector-class">.article-callout</span> <span class="hljs-selector-tag">p</span> &#123;<br>  <span class="hljs-attribute">color</span>: blue;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="不要直接信任外部-HTML">不要直接信任外部 HTML</h3>
+<p>HTML 可以加载资源、创建表单或执行脚本。不要把不可信来源提供的 HTML 或 JavaScript 原样加入博客。</p>
+<hr>
+<h2 id="八、选择-Markdown-还是-HTML">八、选择 Markdown 还是 HTML</h2>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>推荐方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>标题、段落、列表、引用</td>
+<td>Markdown</td>
+</tr>
+<tr>
+<td>普通链接与图片</td>
+<td>Markdown</td>
+</tr>
+<tr>
+<td>代码块和简单表格</td>
+<td>Markdown</td>
+</tr>
+<tr>
+<td>折叠面板、图片说明、进度条</td>
+<td>HTML</td>
+</tr>
+<tr>
+<td>按钮、卡片、多列布局</td>
+<td>HTML + CSS</td>
+</tr>
+<tr>
+<td>播放器、弹窗等复杂交互</td>
+<td>HTML + CSS + JavaScript</td>
+</tr>
+<tr>
+<td>多篇文章复用的视觉样式</td>
+<td>独立 CSS 文件</td>
+</tr>
+</tbody>
+</table>
+<p>Markdown 让写作保持简单，HTML 提供更精确的结构，CSS 和 JavaScript 则扩展了网页的表现力。它们最理想的关系不是互相替代，而是各自承担擅长的部分。</p>
+<p>当一篇文章只需要清晰表达内容时，Markdown 已经足够；当内容需要特殊语义、布局或交互时，再逐步加入 HTML、CSS 与 JavaScript。这种方式既能保持源文件可读，也能让博客拥有自己的视觉风格。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://blog.unmyic.com/">unmyic</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://blog.unmyic.com/2026/07/26/markdown-html-guide/">https://blog.unmyic.com/2026/07/26/markdown-html-guide/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://blog.unmyic.com" target="_blank">unmyic</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Hexo/">Hexo</a><a class="post-meta__tags" href="/tags/CSS/">CSS</a><a class="post-meta__tags" href="/tags/Markdown/">Markdown</a><a class="post-meta__tags" href="/tags/HTML/">HTML</a></div><div class="post-share"><div class="social-share" data-image="/img/post-covers/9.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/07/25/fem-complete-qa-guide/" title="有限元方法（FEM）问答手册"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/FEM.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">有限元方法（FEM）问答手册</div></div><div class="info-2"><div class="info-item-1">一份覆盖有限元方法主要知识点的中英双语问答手册，共 176 个主题，包含考试作答用英文答案、中文解析、公式与高频判断题。</div></div></div></a><a class="pagination-related" href="/2026/07/27/custom-music-player-guide/" title="如何实现一个全站悬浮音乐播放器：Hexo 部署、PJAX 持久化与源码分享"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/pixiv1.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">如何实现一个全站悬浮音乐播放器：Hexo 部署、PJAX 持久化与源码分享</div></div><div class="info-2"><div class="info-item-1">分享本站左下角悬浮音乐播放器的完整实现，介绍网易云歌单接入、播放模式、音量控制、30 秒试听曲目跳过、PJAX 全站持久化，以及 Hexo、普通网页和其他框架中的部署方式。</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/07/27/custom-music-player-guide/" title="如何实现一个全站悬浮音乐播放器：Hexo 部署、PJAX 持久化与源码分享"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/pixiv1.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="fas fa-history fa-fw"></i> 2026-07-28</div><div class="info-item-2">如何实现一个全站悬浮音乐播放器：Hexo 部署、PJAX 持久化与源码分享</div></div><div class="info-2"><div class="info-item-1">分享本站左下角悬浮音乐播放器的完整实现，介绍网易云歌单接入、播放模式、音量控制、30 秒试听曲目跳过、PJAX 全站持久化，以及 Hexo、普通网页和其他框架中的部署方式。</div></div></div></a><a class="pagination-related" href="/2026/07/28/header-moment-clock-guide/" title="为博客添加一个页首时光状态组件：实时时钟、问候与今日进度"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/pixiv5.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="fas fa-history fa-fw"></i> 2026-07-28</div><div class="info-item-2">为博客添加一个页首时光状态组件：实时时钟、问候与今日进度</div></div><div class="info-2"><div class="info-item-1">使用原生 JavaScript 和 CSS 实现一个页首时光状态组件，显示访客本地时间、日期、时段问候与今日进度，并介绍 Hexo Butterfly、普通网页及 PJAX 环境中的部署方式。</div></div></div></a><a class="pagination-related" href="/2026/07/28/hexo-category-tiles-guide/" title="为 Hexo 分类页添加全息磁贴：3D 倾斜、动态反光与明暗主题"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/6.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="fas fa-history fa-fw"></i> 2026-07-28</div><div class="info-item-2">为 Hexo 分类页添加全息磁贴：3D 倾斜、动态反光与明暗主题</div></div><div class="info-2"><div class="info-item-1">将 Butterfly 默认的分类文字列表增强为全息收藏卡式磁贴，加入分类统计、主题色、3D 倾斜、指针反光、暗色适配、移动端降级与 PJAX 支持，并提供可交互预览和完整源码。</div></div></div></a><a class="pagination-related" href="/2025/08/20/Node-js%E4%BB%8B%E7%BB%8D/" title="Node.js介绍"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/node.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="fas fa-history fa-fw"></i> 2026-07-24</div><div class="info-item-2">Node.js介绍</div></div><div class="info-2"><div class="info-item-1">在搭建Hexo博客时，每个教程的第一步都会让你安装环境依赖，而第一个安装的便是Node.js，那么到底什么是Node.js，它在我们的Blog搭建中起了什么作用？实际上，Node.js是一个开源且跨平台的JavaScript运行环境，有了Node，Hexo才能运行、装插件、生成网站。</div></div></div></a><a class="pagination-related" href="/2026/07/30/hexo-butterfly-series/" title="Hexo + Butterfly 个性化博客搭建指南"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/pixiv2.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="fas fa-history fa-fw"></i> 2026-07-30</div><div class="info-item-2">Hexo + Butterfly 个性化博客搭建指南</div></div><div class="info-2"><div class="info-item-1">从零安装 Hexo 与 Butterfly，逐步完成基础配置、页面美化、自定义组件和主题分离。全系列共六篇，既适合第一次搭建博客，也适合希望长期维护和形成独立设计的使用者。</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="gitalk-container"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">unmyic</div><div class="author-info-description">谁终将声震人间，必长久深自缄默</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">9</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">25</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/unmyic"><i class="fab fa-github"></i><span>访问 GitHub</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/unmyic" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="/img/QR/wechat.jpg" target="_blank" title="微信二维码"><i class="fa-brands fa-weixin" style="color: #07c160;"></i></a><a class="social-icon" href="https://space.bilibili.com/3494367889197271" target="_blank" title="哔哩哔哩"><i class="fa-brands fa-bilibili" style="color: #00a1d6;"></i></a><a class="social-icon" href="mailto:unmyic@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">网站还在持续建设中</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81Markdown-%E6%98%AF%E6%80%8E%E6%A0%B7%E5%8F%98%E6%88%90-HTML-%E7%9A%84"><span class="toc-number">2.</span> <span class="toc-text">一、Markdown 是怎样变成 HTML 的</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%B8%B8%E7%94%A8-Markdown-%E4%B8%8E-HTML-%E5%AF%B9%E7%85%A7"><span class="toc-number">3.</span> <span class="toc-text">二、常用 Markdown 与 HTML 对照</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%87%E9%A2%98"><span class="toc-number">3.1.</span> <span class="toc-text">1. 标题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E6%AE%B5%E8%90%BD%E4%B8%8E%E6%8D%A2%E8%A1%8C"><span class="toc-number">3.2.</span> <span class="toc-text">2. 段落与换行</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%BC%BA%E8%B0%83%E6%96%87%E5%AD%97"><span class="toc-number">3.3.</span> <span class="toc-text">3. 强调文字</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E9%93%BE%E6%8E%A5%E4%B8%8E%E5%9B%BE%E7%89%87"><span class="toc-number">3.4.</span> <span class="toc-text">4. 链接与图片</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-%E5%88%97%E8%A1%A8"><span class="toc-number">3.5.</span> <span class="toc-text">5. 列表</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-%E5%BC%95%E7%94%A8"><span class="toc-number">3.6.</span> <span class="toc-text">6. 引用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-%E4%BB%A3%E7%A0%81"><span class="toc-number">3.7.</span> <span class="toc-text">7. 代码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-%E8%A1%A8%E6%A0%BC"><span class="toc-number">3.8.</span> <span class="toc-text">8. 表格</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#9-%E8%BD%AC%E4%B9%89%E7%89%B9%E6%AE%8A%E5%AD%97%E7%AC%A6"><span class="toc-number">3.9.</span> <span class="toc-text">9. 转义特殊字符</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81HTML-%E8%83%BD%E8%A1%A5%E5%85%85%E5%93%AA%E4%BA%9B%E5%8A%9F%E8%83%BD"><span class="toc-number">4.</span> <span class="toc-text">三、HTML 能补充哪些功能</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%8A%98%E5%8F%A0%E5%86%85%E5%AE%B9"><span class="toc-number">4.1.</span> <span class="toc-text">1. 折叠内容</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E9%AB%98%E4%BA%AE%E3%80%81%E4%B8%8A%E4%B8%8B%E6%A0%87%E5%92%8C%E9%94%AE%E7%9B%98%E6%8C%89%E9%94%AE"><span class="toc-number">4.2.</span> <span class="toc-text">2. 高亮、上下标和键盘按键</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E7%BC%A9%E5%86%99%E3%80%81%E6%97%B6%E9%97%B4%E5%92%8C%E6%B3%A8%E9%9F%B3"><span class="toc-number">4.3.</span> <span class="toc-text">3. 缩写、时间和注音</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%9B%BE%E7%89%87%E8%AF%B4%E6%98%8E"><span class="toc-number">4.4.</span> <span class="toc-text">4. 图片说明</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-%E5%8E%9F%E7%94%9F%E8%BF%9B%E5%BA%A6%E4%B8%8E%E5%BA%A6%E9%87%8F"><span class="toc-number">4.5.</span> <span class="toc-text">5. 原生进度与度量</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E7%94%A8-HTML-%E4%B8%8E-CSS-%E5%88%B6%E4%BD%9C%E7%BE%8E%E5%8C%96%E7%BB%84%E4%BB%B6"><span class="toc-number">5.</span> <span class="toc-text">四、用 HTML 与 CSS 制作美化组件</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#HTML"><span class="toc-number">5.1.</span> <span class="toc-text">HTML</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CSS"><span class="toc-number">5.2.</span> <span class="toc-text">CSS</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E5%B8%B8%E8%A7%81-HTML-%E7%BE%8E%E5%8C%96%E6%80%9D%E8%B7%AF"><span class="toc-number">6.</span> <span class="toc-text">五、常见 HTML 美化思路</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E4%BD%BF%E7%94%A8-class%EF%BC%8C%E4%B8%8D%E8%A6%81%E5%A4%8D%E5%88%B6%E5%A4%A7%E9%87%8F%E8%A1%8C%E5%86%85%E6%A0%B7%E5%BC%8F"><span class="toc-number">6.1.</span> <span class="toc-text">1. 使用 class，不要复制大量行内样式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E4%BD%BF%E7%94%A8-CSS-%E5%8F%98%E9%87%8F%E7%BB%9F%E4%B8%80%E4%B8%BB%E9%A2%98%E8%89%B2"><span class="toc-number">6.2.</span> <span class="toc-text">2. 使用 CSS 变量统一主题色</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%90%8C%E6%97%B6%E8%80%83%E8%99%91%E6%9A%97%E8%89%B2%E4%B8%BB%E9%A2%98"><span class="toc-number">6.3.</span> <span class="toc-text">3. 同时考虑暗色主题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E4%B8%BA%E6%89%8B%E6%9C%BA%E7%AB%AF%E6%B7%BB%E5%8A%A0%E5%93%8D%E5%BA%94%E5%BC%8F%E8%A7%84%E5%88%99"><span class="toc-number">6.4.</span> <span class="toc-text">4. 为手机端添加响应式规则</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-%E5%B0%8A%E9%87%8D%E2%80%9C%E5%87%8F%E5%B0%91%E5%8A%A8%E6%80%81%E6%95%88%E6%9E%9C%E2%80%9D%E8%AE%BE%E7%BD%AE"><span class="toc-number">6.5.</span> <span class="toc-text">5. 尊重“减少动态效果”设置</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E5%9C%A8-Hexo-%E5%8D%9A%E5%AE%A2%E4%B8%AD%E5%BA%94%E8%AF%A5%E5%86%99%E5%9C%A8%E5%93%AA%E9%87%8C"><span class="toc-number">7.</span> <span class="toc-text">六、在 Hexo 博客中应该写在哪里</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%8F%AA%E5%B1%9E%E4%BA%8E%E4%B8%80%E7%AF%87%E6%96%87%E7%AB%A0%E7%9A%84%E7%BB%93%E6%9E%84"><span class="toc-number">7.1.</span> <span class="toc-text">1. 只属于一篇文章的结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%A4%9A%E7%AF%87%E6%96%87%E7%AB%A0%E9%83%BD%E4%BC%9A%E4%BD%BF%E7%94%A8%E7%9A%84%E6%A0%B7%E5%BC%8F"><span class="toc-number">7.2.</span> <span class="toc-text">2. 多篇文章都会使用的样式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E9%9C%80%E8%A6%81%E4%BA%A4%E4%BA%92%E8%A1%8C%E4%B8%BA%E7%9A%84%E7%BB%84%E4%BB%B6"><span class="toc-number">7.3.</span> <span class="toc-text">3. 需要交互行为的组件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%9B%BE%E7%89%87%E5%92%8C%E9%99%84%E4%BB%B6"><span class="toc-number">7.4.</span> <span class="toc-text">4. 图片和附件</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E5%AE%B9%E6%98%93%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">8.</span> <span class="toc-text">七、容易遇到的问题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#HTML-%E8%A2%AB%E6%98%BE%E7%A4%BA%E6%88%90%E6%99%AE%E9%80%9A%E6%96%87%E5%AD%97"><span class="toc-number">8.1.</span> <span class="toc-text">HTML 被显示成普通文字</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%87%E7%AD%BE%E5%B5%8C%E5%A5%97%E9%94%99%E8%AF%AF"><span class="toc-number">8.2.</span> <span class="toc-text">标签嵌套错误</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B7%E5%BC%8F%E5%BD%B1%E5%93%8D%E4%BA%86%E6%95%B4%E4%B8%AA%E7%BD%91%E7%AB%99"><span class="toc-number">8.3.</span> <span class="toc-text">样式影响了整个网站</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8D%E8%A6%81%E7%9B%B4%E6%8E%A5%E4%BF%A1%E4%BB%BB%E5%A4%96%E9%83%A8-HTML"><span class="toc-number">8.4.</span> <span class="toc-text">不要直接信任外部 HTML</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E9%80%89%E6%8B%A9-Markdown-%E8%BF%98%E6%98%AF-HTML"><span class="toc-number">9.</span> <span class="toc-text">八、选择 Markdown 还是 HTML</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/07/30/hexo-butterfly-series/" title="Hexo + Butterfly 个性化博客搭建指南"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/pixiv2.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hexo + Butterfly 个性化博客搭建指南"/></a><div class="content"><a class="title" href="/2026/07/30/hexo-butterfly-series/" title="Hexo + Butterfly 个性化博客搭建指南">Hexo + Butterfly 个性化博客搭建指南</a><time datetime="2026-07-30T13:29:00.000Z" title="发表于 2026-07-30 21:29:00">2026-07-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/07/30/game-key-shield-introduction/" title="GameKeyShield：让游戏快捷键与全局热键不再冲突"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/project-covers/game-key-shield.svg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="GameKeyShield：让游戏快捷键与全局热键不再冲突"/></a><div class="content"><a class="title" href="/2026/07/30/game-key-shield-introduction/" title="GameKeyShield：让游戏快捷键与全局热键不再冲突">GameKeyShield：让游戏快捷键与全局热键不再冲突</a><time datetime="2026-07-30T02:15:46.000Z" title="发表于 2026-07-30 10:15:46">2026-07-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/07/29/tray-audio-bridge-introduction/" title="Tray Audio Bridge：把手机声音无线传到 Windows 电脑"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/tray-audio-bridge.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Tray Audio Bridge：把手机声音无线传到 Windows 电脑"/></a><div class="content"><a class="title" href="/2026/07/29/tray-audio-bridge-introduction/" title="Tray Audio Bridge：把手机声音无线传到 Windows 电脑">Tray Audio Bridge：把手机声音无线传到 Windows 电脑</a><time datetime="2026-07-29T08:37:26.000Z" title="发表于 2026-07-29 16:37:26">2026-07-29</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/07/28/hexo-category-tiles-guide/" title="为 Hexo 分类页添加全息磁贴：3D 倾斜、动态反光与明暗主题"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/6.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="为 Hexo 分类页添加全息磁贴：3D 倾斜、动态反光与明暗主题"/></a><div class="content"><a class="title" href="/2026/07/28/hexo-category-tiles-guide/" title="为 Hexo 分类页添加全息磁贴：3D 倾斜、动态反光与明暗主题">为 Hexo 分类页添加全息磁贴：3D 倾斜、动态反光与明暗主题</a><time datetime="2026-07-28T11:38:12.000Z" title="发表于 2026-07-28 19:38:12">2026-07-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/07/28/header-moment-clock-guide/" title="为博客添加一个页首时光状态组件：实时时钟、问候与今日进度"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/pixiv5.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="为博客添加一个页首时光状态组件：实时时钟、问候与今日进度"/></a><div class="content"><a class="title" href="/2026/07/28/header-moment-clock-guide/" title="为博客添加一个页首时光状态组件：实时时钟、问候与今日进度">为博客添加一个页首时光状态组件：实时时钟、问候与今日进度</a><time datetime="2026-07-28T08:44:38.000Z" title="发表于 2026-07-28 16:44:38">2026-07-28</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url(/img/banner-ocean-v2-2k.webp);"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By unmyic</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><div class="js-pjax"><script>(() => {
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = `%%{init:{ 'theme':'${theme}'}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (true) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const applyThemeDefaultsConfig = theme => {
+    if (theme === 'dark-mode') {
+      Chart.defaults.color = "rgba(255, 255, 255, 0.8)"
+      Chart.defaults.borderColor = "rgba(255, 255, 255, 0.2)"
+      Chart.defaults.scale.ticks.backdropColor = "transparent"
+    } else {
+      Chart.defaults.color = "rgba(0, 0, 0, 0.8)"
+      Chart.defaults.borderColor = "rgba(0, 0, 0, 0.1)"
+      Chart.defaults.scale.ticks.backdropColor = "transparent"
+    }
+  }
+
+  // Recursively traverse the config object and automatically apply theme-specific color schemes
+  const applyThemeConfig = (obj, theme) => {
+    if (typeof obj !== 'object' || obj === null) return
+
+    Object.keys(obj).forEach(key => {
+      const value = obj[key]
+      // If the property is an object and has theme-specific options, apply them
+      if (typeof value === 'object' && value !== null) {
+        if (value[theme]) {
+          obj[key] = value[theme] // Apply the value for the current theme
+        } else {
+          // Recursively process child objects
+          applyThemeConfig(value, theme)
+        }
+      }
+    })
+  }
+
+  const runChartJS = ele => {
+    window.loadChartJS = true
+
+    Array.from(ele).forEach((item, index) => {
+      const chartSrc = item.firstElementChild
+      const chartID = item.getAttribute('data-chartjs-id') || ('chartjs-' + index) // Use custom ID or default ID
+      const width = item.getAttribute('data-width')
+      const existingCanvas = document.getElementById(chartID)
+
+      // If a canvas already exists, remove it to avoid rendering duplicates
+      if (existingCanvas) {
+          existingCanvas.parentNode.remove()
+      }
+
+      const chartDefinition = chartSrc.textContent
+      const canvas = document.createElement('canvas')
+      canvas.id = chartID
+
+      const div = document.createElement('div')
+      div.className = 'chartjs-wrap'
+
+      if (width) {
+        div.style.width = width
+      }
+
+      div.appendChild(canvas)
+      chartSrc.insertAdjacentElement('afterend', div)
+
+      const ctx = document.getElementById(chartID).getContext('2d')
+
+      const config = JSON.parse(chartDefinition)
+
+      const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark-mode' : 'light-mode'
+
+      // Set default styles (initial setup)
+      applyThemeDefaultsConfig(theme)
+
+      // Automatically traverse the config and apply dual-mode color schemes
+      applyThemeConfig(config, theme)
+
+      new Chart(ctx, config)
+    })
+  }
+
+  const loadChartJS = () => {
+    const chartJSEle = document.querySelectorAll('#article-container .chartjs-container')
+    if (chartJSEle.length === 0) return
+
+    window.loadChartJS ? runChartJS(chartJSEle) : btf.getScript('https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js').then(() => runChartJS(chartJSEle))
+  }
+
+  // Listen for theme change events
+  btf.addGlobalFn('themeChange', loadChartJS, 'chartjs')
+  btf.addGlobalFn('encrypt', loadChartJS, 'chartjs')
+
+  window.pjax ? loadChartJS() : document.addEventListener('DOMContentLoaded', loadChartJS)
+})()</script><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const commentCount = n => {
+    const isCommentCount = document.querySelector('#post-meta .gitalk-comment-count')
+    if (isCommentCount) {
+      isCommentCount.textContent= n
+    }
+  }
+
+  const initGitalk = (el, path) => {
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGitalk = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+
+    const gitalk = new Gitalk({
+      clientID: 'Ov23liXzl5qiyvMfep1Q',
+      clientSecret: '517baaa10eea2a0b26f6e424a5a84c22db5b865f',
+      repo: 'unmyic.github.io',
+      owner: 'unmyic',
+      admin: ['unmyic'],
+      updateCountCallback: commentCount,
+      ...option,
+      id: isShuoshuo ? path : (option && option.id) || 'a0cfa2feb010dd896f0513480050d658'
+    })
+
+    gitalk.render('gitalk-container')
+  }
+
+  const loadGitalk = async(el, path) => {
+    if (typeof Gitalk === 'function') initGitalk(el, path)
+    else {
+      await btf.getCSS('https://cdn.jsdelivr.net/npm/gitalk/dist/gitalk.min.css')
+      await btf.getScript('https://cdn.jsdelivr.net/npm/gitalk/dist/gitalk.min.js')
+      initGitalk(el, path)
+    }
+  }
+
+  if (isShuoshuo) {
+    'Gitalk' === 'Gitalk'
+      ? window.shuoshuoComment = { loadComment: loadGitalk }
+      : window.loadOtherComment = loadGitalk
+    return
+  }
+
+  if ('Gitalk' === 'Gitalk' || !true) {
+    if (true) btf.loadComment(document.getElementById('gitalk-container'), loadGitalk)
+    else loadGitalk()
+  } else {
+    window.loadOtherComment = loadGitalk
+  }
+})()</script></div><script src="/js/custom-footer.js?v=3"></script><script src="/js/runtime.js?v=7"></script><script defer src="/js/hero-scroll.js?v=11"></script><script defer src="/js/post-layout-switcher.js?v=1"></script><script defer src="/js/theme-atmosphere.js?v=1"></script><script defer src="/js/category-tiles.js?v=2"></script><script defer src="/js/friend-tech-cards.js?v=3"></script><script defer src="/js/tag-constellation.js?v=1"></script><script defer src="/js/command-palette.js?v=2"></script><script defer src="/js/summary-tooltip.js?v=1"></script><script defer src="/js/toc-katex.js?v=1"></script><script defer src="/js/music-player.js?v=8"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = false;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/click-heart.min.js" async="async" mobile="false"></script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>(() => {
+  const pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => fn())
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || item.innerHTML || ""
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    if (e.request.status === 404) {
+      const usePjax = true
+      false
+        ? (usePjax ? pjax.loadUrl('/404.html') : window.location.href = '/404.html')
+        : window.location.href = e.request.responseURL
+    }
+  })
+})()</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

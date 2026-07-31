@@ -1,0 +1,26 @@
+{
+  "threshold": {
+    "entries": 20,
+    "days": 30
+  },
+  "autoPublishOnThreshold": false,
+  "logPage": "source/log/index.md",
+  "scan": {
+    "include": [
+      "source",
+      "scripts",
+      "tools",
+      "_config.yml",
+      "_config.butterfly.yml",
+      "package.json",
+      "package-lock.json",
+      "changelog.config.json"
+    ],
+    "exclude": [
+      "source/log/index.md",
+      "source/_drafts",
+      "source/data/voyager1-ephemeris.json",
+      "source/downloads/fem/FEM_Complete_QA_Guide.pdf"
+    ]
+  }
+}

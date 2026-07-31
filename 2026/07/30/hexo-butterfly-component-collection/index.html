@@ -1,0 +1,667 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Hexo + Butterfly 搭建教程 05：本站自定义组件合集 | unmyic</title><meta name="author" content="unmyic,unmyic@gmail.com"><meta name="copyright" content="unmyic"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="集中介绍本站在 Butterfly 基础上添加的音乐播放器、分类磁贴、标签星座、全局搜索、随机封面、文章布局切换、页脚状态和自动更新日志，并分析它们能否迁移到其他网站。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hexo + Butterfly 搭建教程 05：本站自定义组件合集">
+<meta property="og:url" content="https://blog.unmyic.com/2026/07/30/hexo-butterfly-component-collection/index.html">
+<meta property="og:site_name" content="unmyic">
+<meta property="og:description" content="集中介绍本站在 Butterfly 基础上添加的音乐播放器、分类磁贴、标签星座、全局搜索、随机封面、文章布局切换、页脚状态和自动更新日志，并分析它们能否迁移到其他网站。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog.unmyic.com/img/post-covers/pixiv2.jpg">
+<meta property="article:published_time" content="2026-07-30T13:34:00.000Z">
+<meta property="article:modified_time" content="2026-07-30T13:34:00.000Z">
+<meta property="article:author" content="unmyic">
+<meta property="article:tag" content="Hexo">
+<meta property="article:tag" content="JavaScript">
+<meta property="article:tag" content="CSS">
+<meta property="article:tag" content="博客组件">
+<meta property="article:tag" content="Butterfly">
+<meta property="article:tag" content="Butterfly 搭建系列">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://blog.unmyic.com/img/post-covers/pixiv2.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Hexo + Butterfly 搭建教程 05：本站自定义组件合集",
+  "url": "https://blog.unmyic.com/2026/07/30/hexo-butterfly-component-collection/",
+  "image": "https://blog.unmyic.com/img/post-covers/pixiv2.jpg",
+  "datePublished": "2026-07-30T13:34:00.000Z",
+  "dateModified": "2026-07-30T13:34:00.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "unmyic",
+      "url": "https://blog.unmyic.com/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="https://blog.unmyic.com/2026/07/30/hexo-butterfly-component-collection/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":400,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":500,"languages":{"author":"作者: unmyic","link":"链接: ","source":"来源: unmyic","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: true,
+  islazyloadPlugin: true,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Hexo + Butterfly 搭建教程 05：本站自定义组件合集',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/self/dracula.css"><link rel="stylesheet" href="/css/custom-footer.css?v=6"><link rel="stylesheet" href="/css/hero-scroll.css?v=11"><link rel="stylesheet" href="/css/post-layout-switcher.css?v=1"><link rel="stylesheet" href="/css/theme-atmosphere.css?v=1"><link rel="stylesheet" href="/css/category-tiles.css?v=3"><link rel="stylesheet" href="/css/friend-tech-cards.css?v=4"><link rel="stylesheet" href="/css/tag-constellation.css?v=1"><link rel="stylesheet" href="/css/command-palette.css?v=2"><link rel="stylesheet" href="/css/project-showcase.css?v=1"><link rel="stylesheet" href="/css/summary-tooltip.css?v=1"><link rel="stylesheet" href="/css/site-changelog.css?v=1"><link rel="stylesheet" href="/css/runtime.css?v=3"><link rel="stylesheet" href="/css/toc-katex.css?v=1"><link rel="stylesheet" href="/css/music-player.css?v=10"><meta name="generator" content="Hexo 7.3.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><script>(()=>{
+  const $loadingBox = document.getElementById('loading-box')
+  const $body = document.body
+  const preloader = {
+    endLoading: () => {
+      if ($loadingBox.classList.contains('loaded')) return
+      $body.style.overflow = ''
+      $loadingBox.classList.add('loaded')
+    },
+    initLoading: () => {
+      $body.style.overflow = 'hidden'
+      $loadingBox.classList.remove('loaded')
+    }
+  }
+
+  preloader.initLoading()
+
+  if (document.readyState === 'complete') {
+    preloader.endLoading()
+  } else {
+    window.addEventListener('load', preloader.endLoading)
+    document.addEventListener('DOMContentLoaded', preloader.endLoading)
+    // Add timeout protection: force end after 7 seconds
+    setTimeout(preloader.endLoading, 7000)
+  }
+
+  if (true) {
+    btf.addGlobalFn('pjaxSend', preloader.initLoading, 'preloader_init')
+    btf.addGlobalFn('pjaxComplete', preloader.endLoading, 'preloader_end')
+  }
+})()</script><div id="web_bg" style="background-image: url(/img/banner-ocean-v2-2k.webp);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">9</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">25</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-archive"></i><span> 文章</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-comments"></i><span> 社交</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-globe"></i><span> 网站</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/log/"><i class="fa-fw fas fa-hammer"></i><span> 日志</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/post-covers/pixiv2.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/weblogo.svg" alt="Logo"></a><a class="nav-page-title" href="/"><span class="site-name">Hexo + Butterfly 搭建教程 05：本站自定义组件合集</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-archive"></i><span> 文章</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-comments"></i><span> 社交</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-globe"></i><span> 网站</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/log/"><i class="fa-fw fas fa-hammer"></i><span> 日志</span></a></li></ul></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Hexo + Butterfly 搭建教程 05：本站自定义组件合集</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-07-30T13:34:00.000Z" title="发表于 2026-07-30 21:34:00">2026-07-30</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-07-30T13:34:00.000Z" title="更新于 2026-07-30 21:34:00">2026-07-30</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Web-%E5%BC%80%E5%8F%91/">Web 开发</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">2.3k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>7分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><div id="post-outdate-notice" data="{&quot;limitDay&quot;:365,&quot;messagePrev&quot;:&quot;距离本文最后更新已经&quot;,&quot;messageNext&quot;:&quot;天，部分内容可能已经过时。&quot;,&quot;postUpdate&quot;:&quot;2026-07-30 21:34:00&quot;}" hidden></div><blockquote>
+<p><a href="/2026/07/30/hexo-butterfly-inject-components/">上一篇：使用 Inject 添加自定义组件</a> · <a href="/2026/07/30/hexo-butterfly-series/">系列总目录</a> · <a href="/2026/07/30/hexo-butterfly-to-independent-theme/">下一篇：从定制走向独立主题</a></p>
+</blockquote>
+<h2 id="前言">前言</h2>
+<p>完成基础配置后，本站没有直接修改 Butterfly 的主题包，而是持续通过 <code>source/css</code>、<code>source/js</code> 和 Hexo 生成脚本增加功能。</p>
+<p>这些组件有些只是普通的前端代码，可以移植到任何网站；有些会读取 Hexo 生成的数据；还有一些专门依赖 Butterfly 的 DOM 和 PJAX。了解这种差异，可以避免把“使用了 Hexo”和“只能在 Hexo 中运行”混为一谈。</p>
+<span id="more"></span>
+<hr>
+<h2 id="一、组件与框架的关系">一、组件与框架的关系</h2>
+<p>可以把组件分成三类：</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>特征</th>
+<th style="text-align:center">迁移难度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>通用前端组件</td>
+<td>只需要 HTML、CSS、JavaScript</td>
+<td style="text-align:center">低</td>
+</tr>
+<tr>
+<td>Hexo 数据组件</td>
+<td>读取文章、分类或生成阶段数据</td>
+<td style="text-align:center">中</td>
+</tr>
+<tr>
+<td>Butterfly 增强组件</td>
+<td>依赖 Butterfly DOM、主题切换或 PJAX</td>
+<td style="text-align:center">中到高</td>
+</tr>
+</tbody>
+</table>
+<p>例如音乐播放器本身不要求 Hexo；分类磁贴的动画也不要求 Hexo，但当前脚本读取 Butterfly 分类页生成的类名，因此迁移时需要替换数据入口。</p>
+<hr>
+<h2 id="二、全局音乐播放器">二、全局音乐播放器</h2>
+<p>本站音乐播放器位于页面左下角，主要功能包括：</p>
+<ul>
+<li>网易云歌单加载</li>
+<li>播放与暂停</li>
+<li>上一首和下一首</li>
+<li>音量调节</li>
+<li>顺序、随机、列表循环和单曲循环</li>
+<li>侧边收起与悬浮展开</li>
+<li>预先检查下一首是否可播放</li>
+<li>PJAX 页面跳转后保持全局可用</li>
+</ul>
+<p>它的主体是原生 JavaScript 和 CSS，并不是只有 Hexo 才能使用。迁移到其他网站时需要：</p>
+<ol>
+<li>在全局布局中加载播放器资源。</li>
+<li>提供歌单数据接口。</li>
+<li>把 PJAX 生命周期替换为目标框架的路由生命周期。</li>
+</ol>
+<p>需要注意，用户拥有网易云 VIP 并不代表访客可以通过第三方网页播放器获得完整 VIP 权限。VIP、版权限制、地区限制和接口状态都由音乐服务决定。</p>
+<p>完整实现已经在独立教程中介绍：</p>
+<p><a href="/2026/07/27/custom-music-player-guide/">为博客部署自制网易云音乐播放器</a></p>
+<hr>
+<h2 id="三、分类全息磁贴">三、分类全息磁贴</h2>
+<p>Butterfly 默认分类总览主要是文字链接。本站在不修改主题模板的情况下，把它增强为：</p>
+<ul>
+<li>双列响应式磁贴</li>
+<li>分类名称和文章数量</li>
+<li>独立图标、说明和色相</li>
+<li>指针跟随高光</li>
+<li>轻微 3D 倾斜</li>
+<li>暗色主题适配</li>
+<li>奇数卡片居中</li>
+<li>手机端单列</li>
+</ul>
+<p>实现方式是读取：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs html">.category-lists .category-list-item<br></code></pre></td></tr></table></figure>
+<p>然后保留原始链接，重新组织内部结构。JavaScript 失败时仍会显示 Butterfly 默认分类列表，这是一种渐进增强。</p>
+<p>完整教程：</p>
+<p><a href="/2026/07/28/hexo-category-tiles-guide/">为 Hexo 分类页添加全息磁贴</a></p>
+<hr>
+<h2 id="四、标签星座">四、标签星座</h2>
+<p>标签页适合表达内容之间的联系，而不只是标签名称列表。本站将标签展示成具有空间层次的星座节点：</p>
+<ul>
+<li>标签数量映射为视觉权重</li>
+<li>明暗主题分别配色</li>
+<li>悬浮显示强调效果</li>
+<li>手机端降低动态并保持可点击区域</li>
+</ul>
+<p>它当前读取 Butterfly 标签页 DOM，因此属于 Butterfly 增强组件。若迁移到独立主题，可以直接在模板阶段输出同样的数据结构，省去浏览器中的二次重组。</p>
+<hr>
+<h2 id="五、技术参考与朋友友链">五、技术参考与朋友友链</h2>
+<p>友链页面被拆分为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs text">技术参考<br>    Hexo / Butterfly / 设计参考<br><br>我的朋友<br>    朋友博客和个人介绍<br></code></pre></td></tr></table></figure>
+<p>技术参考采用一行三张的紧凑卡片，悬浮时放大并展示更多信息；朋友区域使用更完整的头像与介绍卡。</p>
+<p>这个设计解决了两类链接语义不同的问题：</p>
+<ul>
+<li>技术资料强调访问效率。</li>
+<li>朋友链接强调人物与关系。</li>
+</ul>
+<p>实现仍是普通 HTML、CSS 和 JavaScript，可迁移性较高。</p>
+<hr>
+<h2 id="六、全局命令面板搜索">六、全局命令面板搜索</h2>
+<p>原生搜索入口适合传统博客，但内容和组件增加后，需要一个更接近桌面应用的全局入口。</p>
+<p>本站命令面板提供：</p>
+<ul>
+<li>固定在右上角的入口</li>
+<li>键盘快捷键</li>
+<li>搜索文章标题、简介和标签</li>
+<li>快速打开分类、标签、日志和友链</li>
+<li>支持 PJAX 导航</li>
+<li>手机端独立排版</li>
+</ul>
+<p>它的数据来自 Hexo 生成的搜索索引，因此搜索界面是通用组件，数据层则属于 Hexo 集成。</p>
+<p>有了全局检索后，原来的搜索按钮可以隐藏，避免两个入口功能重复。</p>
+<hr>
+<h2 id="七、首页单列与双列切换">七、首页单列与双列切换</h2>
+<p>访客可以选择：</p>
+<ul>
+<li>一行一篇：更适合阅读摘要</li>
+<li>一行两篇：更适合快速浏览</li>
+</ul>
+<p>组件需要处理：</p>
+<ul>
+<li>奇数篇文章的最后一张卡片</li>
+<li>不同卡片高度</li>
+<li>手机端强制单列</li>
+<li>用户选择的本地保存</li>
+<li>页面切换后的布局恢复</li>
+</ul>
+<p>用户偏好可以保存到：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-variable language_">localStorage</span>.<span class="hljs-title function_">setItem</span>(<span class="hljs-string">&#x27;post-layout&#x27;</span>, <span class="hljs-string">&#x27;grid&#x27;</span>);<br></code></pre></td></tr></table></figure>
+<p>这个功能与 Butterfly 首页 DOM 有一定耦合，但核心网格逻辑可以迁移。</p>
+<hr>
+<h2 id="八、随机封面图池与固定映射">八、随机封面图池与固定映射</h2>
+<p>这是一个 Hexo 生成阶段组件，而不是浏览器组件。</p>
+<p>工作流程：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs text">读取 source/img/post-covers<br>        ↓<br>找到没有显式 cover 的文章<br>        ↓<br>从使用次数较少的图片中随机选择<br>        ↓<br>保存到 data/cover-assignments.json<br>        ↓<br>后续部署继续使用同一张<br></code></pre></td></tr></table></figure>
+<p>只有图片被移出图池时，对应文章才会重新分配。这样既保留随机性，又避免每次部署后封面变化。</p>
+<p>文章页首图和首页封面被分离处理，防止竖图在标题横幅中被严重裁切。</p>
+<p>这个功能依赖 Hexo 的生成钩子，迁移到其他静态生成器时需要改写构建插件，但算法本身可以保留。</p>
+<hr>
+<h2 id="九、页脚运行状态与旅行者一号">九、页脚运行状态与旅行者一号</h2>
+<p>页脚目前组合了：</p>
+<ul>
+<li>博客运行时间</li>
+<li>旅行者一号任务信息</li>
+<li>简短状态文字</li>
+<li>“暗淡蓝点”格言</li>
+</ul>
+<p>状态规则被简化为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs text">部署后的 3 小时内：忙碌中，正在建设<br>其他时间：博客在线，安静运行<br></code></pre></td></tr></table></figure>
+<p>部署脚本写入最后部署时间，浏览器脚本计算当前状态。这比根据随机事件或访问动作推测站长状态更加明确。</p>
+<p>旅行者一号数据会定期更新，不应该把一个永远不变的距离数字直接写死在页面中。</p>
+<hr>
+<h2 id="十、自动更新日志">十、自动更新日志</h2>
+<p>本站部署流程不仅执行 <code>hexo deploy</code>，还在 npm 脚本中加入：</p>
+<ul>
+<li>更新外部数据</li>
+<li>检查项目变化</li>
+<li>收集待发布日志</li>
+<li>标记部署时间</li>
+<li>生成网站</li>
+<li>执行部署</li>
+</ul>
+<p>更新日志不会每次自动发布为文章，而是先积累在本地记录中。等变化足够多时，再统一整理到日志页面。</p>
+<p>这说明：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">npm run deploy<br></code></pre></td></tr></table></figure>
+<p>和：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">hexo deploy<br></code></pre></td></tr></table></figure>
+<p>可能具有不同效果。前者执行 <code>package.json</code> 中定义的完整流程，后者只调用 Hexo 部署器。</p>
+<hr>
+<h2 id="十一、文章简介悬浮详情">十一、文章简介悬浮详情</h2>
+<p>首页卡片为了整齐通常会限制摘要行数，但长简介会被截断。本站在摘要确实溢出时提供悬浮详情：</p>
+<ul>
+<li>普通状态保持固定高度</li>
+<li>鼠标悬浮显示完整文本</li>
+<li>没有溢出时不创建提示</li>
+<li>手机端不依赖 hover</li>
+</ul>
+<p>这类功能要先比较元素的 <code>scrollHeight</code> 和 <code>clientHeight</code>，不能给所有摘要无条件显示重复提示。</p>
+<hr>
+<h2 id="十二、时钟组件为什么被停用">十二、时钟组件为什么被停用</h2>
+<p>页首时钟曾显示日期、时间和状态，但它过于显眼，会与首页标题和背景争夺视觉中心。因此组件代码被保留，默认注入被注释。</p>
+<p>这是组件设计中很重要的一点：</p>
+<blockquote>
+<p>功能完整不等于应该启用。</p>
+</blockquote>
+<p>博客首先是阅读空间。一个组件如果无法改善导航、阅读或氛围，就应该降低存在感，甚至暂时关闭。</p>
+<p>时钟的完整制作方式仍保留在教程中：</p>
+<p><a href="/2026/07/28/header-moment-clock-guide/">为博客添加时光状态组件</a></p>
+<hr>
+<h2 id="十三、如何决定下一个组件">十三、如何决定下一个组件</h2>
+<p>可以用四个问题筛选：</p>
+<ol>
+<li>它解决了真实问题吗？</li>
+<li>原生配置是否已经能够完成？</li>
+<li>手机端和无障碍状态怎样处理？</li>
+<li>主题升级后维护成本有多高？</li>
+</ol>
+<p>优先开发：</p>
+<ul>
+<li>改善导航和搜索的组件</li>
+<li>减少重复操作的自动化</li>
+<li>强化文章组织方式的组件</li>
+<li>与网站内容气质一致的轻量氛围效果</li>
+</ul>
+<p>谨慎添加：</p>
+<ul>
+<li>大面积跟随鼠标动画</li>
+<li>自动播放音频</li>
+<li>多个功能重复的悬浮按钮</li>
+<li>阻挡正文的弹窗</li>
+<li>依赖不稳定第三方接口的核心功能</li>
+</ul>
+<p>下一篇将讨论这些定制内容怎样逐步脱离 Butterfly，形成结构清晰的独立 Hexo 主题。</p>
+<hr>
+<h2 id="参考资料与声明">参考资料与声明</h2>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/api/">Hexo 插件文档</a></li>
+<li><a target="_blank" rel="noopener" href="https://butterfly.js.org/">Butterfly 官方文档</a></li>
+</ul>
+<p>本文中的组件均来自本站实际使用或保留的实现。部分结构与文字由 AI 协助整理。</p>
+<hr>
+<blockquote>
+<p><a href="/2026/07/30/hexo-butterfly-inject-components/">上一篇：使用 Inject 添加自定义组件</a> · <a href="/2026/07/30/hexo-butterfly-series/">返回系列总目录</a> · <a href="/2026/07/30/hexo-butterfly-to-independent-theme/">下一篇：从定制走向独立主题</a></p>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://blog.unmyic.com/">unmyic</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://blog.unmyic.com/2026/07/30/hexo-butterfly-component-collection/">https://blog.unmyic.com/2026/07/30/hexo-butterfly-component-collection/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://blog.unmyic.com" target="_blank">unmyic</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Hexo/">Hexo</a><a class="post-meta__tags" href="/tags/JavaScript/">JavaScript</a><a class="post-meta__tags" href="/tags/CSS/">CSS</a><a class="post-meta__tags" href="/tags/%E5%8D%9A%E5%AE%A2%E7%BB%84%E4%BB%B6/">博客组件</a><a class="post-meta__tags" href="/tags/Butterfly/">Butterfly</a><a class="post-meta__tags" href="/tags/Butterfly-%E6%90%AD%E5%BB%BA%E7%B3%BB%E5%88%97/">Butterfly 搭建系列</a></div><div class="post-share"><div class="social-share" data-image="/img/post-covers/pixiv2.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/07/30/hexo-butterfly-inject-components/" title="Hexo + Butterfly 搭建教程 04：使用 Inject 添加自定义组件"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/pixiv2.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Hexo + Butterfly 搭建教程 04：使用 Inject 添加自定义组件</div></div><div class="info-2"><div class="info-item-1">使用 Butterfly 的 Inject 配置加载自定义 CSS 与 JavaScript，建立支持 PJAX、重复初始化防护、移动端降级、资源缓存和无脚本回退的博客组件开发模板。</div></div></div></a><a class="pagination-related" href="/2026/07/30/hexo-butterfly-to-independent-theme/" title="Hexo + Butterfly 搭建教程 06：从定制走向独立主题"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/pixiv2.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Hexo + Butterfly 搭建教程 06：从定制走向独立主题</div></div><div class="info-2"><div class="info-item-1">分析定制博客对 Butterfly 的真实依赖，设计独立 Hexo 主题的配置、模板、样式和脚本结构，并给出能够与现有网站并行验证的渐进迁移路线。</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/07/28/hexo-category-tiles-guide/" title="为 Hexo 分类页添加全息磁贴：3D 倾斜、动态反光与明暗主题"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/6.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="fas fa-history fa-fw"></i> 2026-07-28</div><div class="info-item-2">为 Hexo 分类页添加全息磁贴：3D 倾斜、动态反光与明暗主题</div></div><div class="info-2"><div class="info-item-1">将 Butterfly 默认的分类文字列表增强为全息收藏卡式磁贴，加入分类统计、主题色、3D 倾斜、指针反光、暗色适配、移动端降级与 PJAX 支持，并提供可交互预览和完整源码。</div></div></div></a><a class="pagination-related" href="/2026/07/28/header-moment-clock-guide/" title="为博客添加一个页首时光状态组件：实时时钟、问候与今日进度"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/pixiv5.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="fas fa-history fa-fw"></i> 2026-07-28</div><div class="info-item-2">为博客添加一个页首时光状态组件：实时时钟、问候与今日进度</div></div><div class="info-2"><div class="info-item-1">使用原生 JavaScript 和 CSS 实现一个页首时光状态组件，显示访客本地时间、日期、时段问候与今日进度，并介绍 Hexo Butterfly、普通网页及 PJAX 环境中的部署方式。</div></div></div></a><a class="pagination-related" href="/2026/07/27/custom-music-player-guide/" title="如何实现一个全站悬浮音乐播放器：Hexo 部署、PJAX 持久化与源码分享"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/pixiv1.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="fas fa-history fa-fw"></i> 2026-07-28</div><div class="info-item-2">如何实现一个全站悬浮音乐播放器：Hexo 部署、PJAX 持久化与源码分享</div></div><div class="info-2"><div class="info-item-1">分享本站左下角悬浮音乐播放器的完整实现，介绍网易云歌单接入、播放模式、音量控制、30 秒试听曲目跳过、PJAX 全站持久化，以及 Hexo、普通网页和其他框架中的部署方式。</div></div></div></a><a class="pagination-related" href="/2026/07/30/hexo-butterfly-series/" title="Hexo + Butterfly 个性化博客搭建指南"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/pixiv2.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="fas fa-history fa-fw"></i> 2026-07-30</div><div class="info-item-2">Hexo + Butterfly 个性化博客搭建指南</div></div><div class="info-2"><div class="info-item-1">从零安装 Hexo 与 Butterfly，逐步完成基础配置、页面美化、自定义组件和主题分离。全系列共六篇，既适合第一次搭建博客，也适合希望长期维护和形成独立设计的使用者。</div></div></div></a><a class="pagination-related" href="/2026/07/26/markdown-html-guide/" title="Markdown 与 HTML：从基础语法到博客美化"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/9.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="fas fa-history fa-fw"></i> 2026-07-28</div><div class="info-item-2">Markdown 与 HTML：从基础语法到博客美化</div></div><div class="info-2"><div class="info-item-1">系统梳理 Markdown 的常用语法、它们生成的 HTML 结构，以及 Markdown 不便表达时如何使用 HTML 与 CSS，为 Hexo 博客加入提示卡片、折叠内容、按钮、进度条和响应式布局。</div></div></div></a><a class="pagination-related" href="/2025/08/20/Node-js%E4%BB%8B%E7%BB%8D/" title="Node.js介绍"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/node.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="fas fa-history fa-fw"></i> 2026-07-24</div><div class="info-item-2">Node.js介绍</div></div><div class="info-2"><div class="info-item-1">在搭建Hexo博客时，每个教程的第一步都会让你安装环境依赖，而第一个安装的便是Node.js，那么到底什么是Node.js，它在我们的Blog搭建中起了什么作用？实际上，Node.js是一个开源且跨平台的JavaScript运行环境，有了Node，Hexo才能运行、装插件、生成网站。</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="gitalk-container"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">unmyic</div><div class="author-info-description">谁终将声震人间，必长久深自缄默</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">9</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">25</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/unmyic"><i class="fab fa-github"></i><span>访问 GitHub</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/unmyic" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="/img/QR/wechat.jpg" target="_blank" title="微信二维码"><i class="fa-brands fa-weixin" style="color: #07c160;"></i></a><a class="social-icon" href="https://space.bilibili.com/3494367889197271" target="_blank" title="哔哩哔哩"><i class="fa-brands fa-bilibili" style="color: #00a1d6;"></i></a><a class="social-icon" href="mailto:unmyic@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">网站还在持续建设中</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E7%BB%84%E4%BB%B6%E4%B8%8E%E6%A1%86%E6%9E%B6%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="toc-number">2.</span> <span class="toc-text">一、组件与框架的关系</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%85%A8%E5%B1%80%E9%9F%B3%E4%B9%90%E6%92%AD%E6%94%BE%E5%99%A8"><span class="toc-number">3.</span> <span class="toc-text">二、全局音乐播放器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%88%86%E7%B1%BB%E5%85%A8%E6%81%AF%E7%A3%81%E8%B4%B4"><span class="toc-number">4.</span> <span class="toc-text">三、分类全息磁贴</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E6%A0%87%E7%AD%BE%E6%98%9F%E5%BA%A7"><span class="toc-number">5.</span> <span class="toc-text">四、标签星座</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E6%8A%80%E6%9C%AF%E5%8F%82%E8%80%83%E4%B8%8E%E6%9C%8B%E5%8F%8B%E5%8F%8B%E9%93%BE"><span class="toc-number">6.</span> <span class="toc-text">五、技术参考与朋友友链</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E5%85%A8%E5%B1%80%E5%91%BD%E4%BB%A4%E9%9D%A2%E6%9D%BF%E6%90%9C%E7%B4%A2"><span class="toc-number">7.</span> <span class="toc-text">六、全局命令面板搜索</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E9%A6%96%E9%A1%B5%E5%8D%95%E5%88%97%E4%B8%8E%E5%8F%8C%E5%88%97%E5%88%87%E6%8D%A2"><span class="toc-number">8.</span> <span class="toc-text">七、首页单列与双列切换</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E9%9A%8F%E6%9C%BA%E5%B0%81%E9%9D%A2%E5%9B%BE%E6%B1%A0%E4%B8%8E%E5%9B%BA%E5%AE%9A%E6%98%A0%E5%B0%84"><span class="toc-number">9.</span> <span class="toc-text">八、随机封面图池与固定映射</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%9D%E3%80%81%E9%A1%B5%E8%84%9A%E8%BF%90%E8%A1%8C%E7%8A%B6%E6%80%81%E4%B8%8E%E6%97%85%E8%A1%8C%E8%80%85%E4%B8%80%E5%8F%B7"><span class="toc-number">10.</span> <span class="toc-text">九、页脚运行状态与旅行者一号</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E3%80%81%E8%87%AA%E5%8A%A8%E6%9B%B4%E6%96%B0%E6%97%A5%E5%BF%97"><span class="toc-number">11.</span> <span class="toc-text">十、自动更新日志</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E4%B8%80%E3%80%81%E6%96%87%E7%AB%A0%E7%AE%80%E4%BB%8B%E6%82%AC%E6%B5%AE%E8%AF%A6%E6%83%85"><span class="toc-number">12.</span> <span class="toc-text">十一、文章简介悬浮详情</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E4%BA%8C%E3%80%81%E6%97%B6%E9%92%9F%E7%BB%84%E4%BB%B6%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A2%AB%E5%81%9C%E7%94%A8"><span class="toc-number">13.</span> <span class="toc-text">十二、时钟组件为什么被停用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E4%B8%89%E3%80%81%E5%A6%82%E4%BD%95%E5%86%B3%E5%AE%9A%E4%B8%8B%E4%B8%80%E4%B8%AA%E7%BB%84%E4%BB%B6"><span class="toc-number">14.</span> <span class="toc-text">十三、如何决定下一个组件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99%E4%B8%8E%E5%A3%B0%E6%98%8E"><span class="toc-number">15.</span> <span class="toc-text">参考资料与声明</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/07/30/hexo-butterfly-series/" title="Hexo + Butterfly 个性化博客搭建指南"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/pixiv2.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hexo + Butterfly 个性化博客搭建指南"/></a><div class="content"><a class="title" href="/2026/07/30/hexo-butterfly-series/" title="Hexo + Butterfly 个性化博客搭建指南">Hexo + Butterfly 个性化博客搭建指南</a><time datetime="2026-07-30T13:29:00.000Z" title="发表于 2026-07-30 21:29:00">2026-07-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/07/30/game-key-shield-introduction/" title="GameKeyShield：让游戏快捷键与全局热键不再冲突"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/project-covers/game-key-shield.svg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="GameKeyShield：让游戏快捷键与全局热键不再冲突"/></a><div class="content"><a class="title" href="/2026/07/30/game-key-shield-introduction/" title="GameKeyShield：让游戏快捷键与全局热键不再冲突">GameKeyShield：让游戏快捷键与全局热键不再冲突</a><time datetime="2026-07-30T02:15:46.000Z" title="发表于 2026-07-30 10:15:46">2026-07-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/07/29/tray-audio-bridge-introduction/" title="Tray Audio Bridge：把手机声音无线传到 Windows 电脑"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/tray-audio-bridge.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Tray Audio Bridge：把手机声音无线传到 Windows 电脑"/></a><div class="content"><a class="title" href="/2026/07/29/tray-audio-bridge-introduction/" title="Tray Audio Bridge：把手机声音无线传到 Windows 电脑">Tray Audio Bridge：把手机声音无线传到 Windows 电脑</a><time datetime="2026-07-29T08:37:26.000Z" title="发表于 2026-07-29 16:37:26">2026-07-29</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/07/28/hexo-category-tiles-guide/" title="为 Hexo 分类页添加全息磁贴：3D 倾斜、动态反光与明暗主题"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/6.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="为 Hexo 分类页添加全息磁贴：3D 倾斜、动态反光与明暗主题"/></a><div class="content"><a class="title" href="/2026/07/28/hexo-category-tiles-guide/" title="为 Hexo 分类页添加全息磁贴：3D 倾斜、动态反光与明暗主题">为 Hexo 分类页添加全息磁贴：3D 倾斜、动态反光与明暗主题</a><time datetime="2026-07-28T11:38:12.000Z" title="发表于 2026-07-28 19:38:12">2026-07-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/07/28/header-moment-clock-guide/" title="为博客添加一个页首时光状态组件：实时时钟、问候与今日进度"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/pixiv5.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="为博客添加一个页首时光状态组件：实时时钟、问候与今日进度"/></a><div class="content"><a class="title" href="/2026/07/28/header-moment-clock-guide/" title="为博客添加一个页首时光状态组件：实时时钟、问候与今日进度">为博客添加一个页首时光状态组件：实时时钟、问候与今日进度</a><time datetime="2026-07-28T08:44:38.000Z" title="发表于 2026-07-28 16:44:38">2026-07-28</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url(/img/banner-ocean-v2-2k.webp);"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By unmyic</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><div class="js-pjax"><script>(() => {
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = `%%{init:{ 'theme':'${theme}'}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (true) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const applyThemeDefaultsConfig = theme => {
+    if (theme === 'dark-mode') {
+      Chart.defaults.color = "rgba(255, 255, 255, 0.8)"
+      Chart.defaults.borderColor = "rgba(255, 255, 255, 0.2)"
+      Chart.defaults.scale.ticks.backdropColor = "transparent"
+    } else {
+      Chart.defaults.color = "rgba(0, 0, 0, 0.8)"
+      Chart.defaults.borderColor = "rgba(0, 0, 0, 0.1)"
+      Chart.defaults.scale.ticks.backdropColor = "transparent"
+    }
+  }
+
+  // Recursively traverse the config object and automatically apply theme-specific color schemes
+  const applyThemeConfig = (obj, theme) => {
+    if (typeof obj !== 'object' || obj === null) return
+
+    Object.keys(obj).forEach(key => {
+      const value = obj[key]
+      // If the property is an object and has theme-specific options, apply them
+      if (typeof value === 'object' && value !== null) {
+        if (value[theme]) {
+          obj[key] = value[theme] // Apply the value for the current theme
+        } else {
+          // Recursively process child objects
+          applyThemeConfig(value, theme)
+        }
+      }
+    })
+  }
+
+  const runChartJS = ele => {
+    window.loadChartJS = true
+
+    Array.from(ele).forEach((item, index) => {
+      const chartSrc = item.firstElementChild
+      const chartID = item.getAttribute('data-chartjs-id') || ('chartjs-' + index) // Use custom ID or default ID
+      const width = item.getAttribute('data-width')
+      const existingCanvas = document.getElementById(chartID)
+
+      // If a canvas already exists, remove it to avoid rendering duplicates
+      if (existingCanvas) {
+          existingCanvas.parentNode.remove()
+      }
+
+      const chartDefinition = chartSrc.textContent
+      const canvas = document.createElement('canvas')
+      canvas.id = chartID
+
+      const div = document.createElement('div')
+      div.className = 'chartjs-wrap'
+
+      if (width) {
+        div.style.width = width
+      }
+
+      div.appendChild(canvas)
+      chartSrc.insertAdjacentElement('afterend', div)
+
+      const ctx = document.getElementById(chartID).getContext('2d')
+
+      const config = JSON.parse(chartDefinition)
+
+      const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark-mode' : 'light-mode'
+
+      // Set default styles (initial setup)
+      applyThemeDefaultsConfig(theme)
+
+      // Automatically traverse the config and apply dual-mode color schemes
+      applyThemeConfig(config, theme)
+
+      new Chart(ctx, config)
+    })
+  }
+
+  const loadChartJS = () => {
+    const chartJSEle = document.querySelectorAll('#article-container .chartjs-container')
+    if (chartJSEle.length === 0) return
+
+    window.loadChartJS ? runChartJS(chartJSEle) : btf.getScript('https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js').then(() => runChartJS(chartJSEle))
+  }
+
+  // Listen for theme change events
+  btf.addGlobalFn('themeChange', loadChartJS, 'chartjs')
+  btf.addGlobalFn('encrypt', loadChartJS, 'chartjs')
+
+  window.pjax ? loadChartJS() : document.addEventListener('DOMContentLoaded', loadChartJS)
+})()</script><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const commentCount = n => {
+    const isCommentCount = document.querySelector('#post-meta .gitalk-comment-count')
+    if (isCommentCount) {
+      isCommentCount.textContent= n
+    }
+  }
+
+  const initGitalk = (el, path) => {
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGitalk = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+
+    const gitalk = new Gitalk({
+      clientID: 'Ov23liXzl5qiyvMfep1Q',
+      clientSecret: '517baaa10eea2a0b26f6e424a5a84c22db5b865f',
+      repo: 'unmyic.github.io',
+      owner: 'unmyic',
+      admin: ['unmyic'],
+      updateCountCallback: commentCount,
+      ...option,
+      id: isShuoshuo ? path : (option && option.id) || '28e3a4d7e48a0e194ad2d416440807ea'
+    })
+
+    gitalk.render('gitalk-container')
+  }
+
+  const loadGitalk = async(el, path) => {
+    if (typeof Gitalk === 'function') initGitalk(el, path)
+    else {
+      await btf.getCSS('https://cdn.jsdelivr.net/npm/gitalk/dist/gitalk.min.css')
+      await btf.getScript('https://cdn.jsdelivr.net/npm/gitalk/dist/gitalk.min.js')
+      initGitalk(el, path)
+    }
+  }
+
+  if (isShuoshuo) {
+    'Gitalk' === 'Gitalk'
+      ? window.shuoshuoComment = { loadComment: loadGitalk }
+      : window.loadOtherComment = loadGitalk
+    return
+  }
+
+  if ('Gitalk' === 'Gitalk' || !true) {
+    if (true) btf.loadComment(document.getElementById('gitalk-container'), loadGitalk)
+    else loadGitalk()
+  } else {
+    window.loadOtherComment = loadGitalk
+  }
+})()</script></div><script src="/js/custom-footer.js?v=3"></script><script src="/js/runtime.js?v=7"></script><script defer src="/js/hero-scroll.js?v=11"></script><script defer src="/js/post-layout-switcher.js?v=1"></script><script defer src="/js/theme-atmosphere.js?v=1"></script><script defer src="/js/category-tiles.js?v=2"></script><script defer src="/js/friend-tech-cards.js?v=3"></script><script defer src="/js/tag-constellation.js?v=1"></script><script defer src="/js/command-palette.js?v=2"></script><script defer src="/js/summary-tooltip.js?v=1"></script><script defer src="/js/toc-katex.js?v=1"></script><script defer src="/js/music-player.js?v=8"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = false;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/click-heart.min.js" async="async" mobile="false"></script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>(() => {
+  const pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => fn())
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || item.innerHTML || ""
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    if (e.request.status === 404) {
+      const usePjax = true
+      false
+        ? (usePjax ? pjax.loadUrl('/404.html') : window.location.href = '/404.html')
+        : window.location.href = e.request.responseURL
+    }
+  })
+})()</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

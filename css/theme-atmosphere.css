@@ -1,0 +1,149 @@
+/* 主题切换：旧背景短暂保留并淡出，让两张底图自然交接。 */
+#web_bg.theme-crossfade::after {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  background-image: var(--theme-previous-background);
+  background-position: var(--theme-previous-position, center center);
+  background-size: cover;
+  background-repeat: no-repeat;
+  content: '';
+  opacity: 1;
+  pointer-events: none;
+}
+
+#web_bg.theme-crossfade.theme-crossfade-run::after {
+  opacity: 0;
+  transition: opacity 0.82s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+body,
+#nav,
+.card-widget,
+.recent-post-item,
+.layout > div:first-child:not(.nc),
+#footer,
+#site-title,
+#site-subtitle,
+#aside-content .card-info,
+#nav .site-page {
+  transition:
+    color 0.55s ease,
+    background-color 0.55s ease,
+    border-color 0.55s ease,
+    box-shadow 0.55s ease,
+    text-shadow 0.55s ease;
+}
+
+/* 夜间动态霓虹：标题、个人卡片和菜单使用不同强度，避免整页过亮。 */
+[data-theme='dark'] #site-title {
+  color: #eefaff;
+  text-shadow:
+    0 0 5px rgba(255, 255, 255, 0.92),
+    0 0 13px rgba(99, 210, 255, 0.9),
+    0 0 30px rgba(77, 121, 255, 0.72);
+  animation: neonTitlePulse 3.4s ease-in-out infinite;
+}
+
+[data-theme='dark'] #site-subtitle {
+  color: #d9f5ff;
+  text-shadow:
+    0 0 5px rgba(161, 229, 255, 0.84),
+    0 0 14px rgba(92, 156, 255, 0.72);
+  animation: neonSubtitlePulse 4.2s ease-in-out -1.1s infinite;
+}
+
+[data-theme='dark'] #aside-content .card-info {
+  border: 1px solid rgba(102, 211, 255, 0.38);
+  box-shadow:
+    0 0 12px rgba(68, 179, 255, 0.2),
+    inset 0 0 18px rgba(74, 111, 255, 0.08);
+  animation: neonCardPulse 4.8s ease-in-out infinite;
+}
+
+[data-theme='dark'] #aside-content .card-info .avatar-img {
+  box-shadow:
+    0 0 10px rgba(115, 225, 255, 0.58),
+    0 0 24px rgba(85, 126, 255, 0.4);
+}
+
+[data-theme='dark'] #aside-content .author-info-name,
+[data-theme='dark'] #aside-content .author-info-description,
+[data-theme='dark'] #aside-content .site-data {
+  text-shadow:
+    0 0 5px rgba(142, 224, 255, 0.58),
+    0 0 11px rgba(95, 134, 255, 0.35);
+}
+
+[data-theme='dark'] #nav .site-page,
+[data-theme='dark'] #sidebar-menus .site-page {
+  color: #e6f8ff;
+  text-shadow:
+    0 0 4px rgba(198, 242, 255, 0.9),
+    0 0 9px rgba(82, 192, 255, 0.72);
+}
+
+[data-theme='dark'] #nav .site-page:hover,
+[data-theme='dark'] #sidebar-menus .site-page:hover {
+  color: #fff;
+  text-shadow:
+    0 0 5px #fff,
+    0 0 12px rgba(85, 220, 255, 0.95),
+    0 0 20px rgba(101, 99, 255, 0.78);
+}
+
+@keyframes neonTitlePulse {
+  0%,
+  100% {
+    filter: brightness(0.92);
+    text-shadow:
+      0 0 4px rgba(255, 255, 255, 0.8),
+      0 0 11px rgba(99, 210, 255, 0.72),
+      0 0 24px rgba(77, 121, 255, 0.52);
+  }
+  50% {
+    filter: brightness(1.15);
+    text-shadow:
+      0 0 7px #fff,
+      0 0 18px rgba(99, 224, 255, 1),
+      0 0 38px rgba(91, 112, 255, 0.88);
+  }
+}
+
+@keyframes neonSubtitlePulse {
+  0%,
+  100% {
+    opacity: 0.82;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes neonCardPulse {
+  0%,
+  100% {
+    border-color: rgba(102, 211, 255, 0.3);
+    box-shadow:
+      0 0 10px rgba(68, 179, 255, 0.14),
+      inset 0 0 15px rgba(74, 111, 255, 0.06);
+  }
+  50% {
+    border-color: rgba(151, 231, 255, 0.62);
+    box-shadow:
+      0 0 19px rgba(68, 179, 255, 0.34),
+      inset 0 0 24px rgba(94, 111, 255, 0.12);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #web_bg.theme-crossfade.theme-crossfade-run::after {
+    transition: none;
+  }
+
+  [data-theme='dark'] #site-title,
+  [data-theme='dark'] #site-subtitle,
+  [data-theme='dark'] #aside-content .card-info {
+    animation: none !important;
+  }
+}

@@ -1,0 +1,67 @@
+/*
+ * Full introduction tooltip for truncated home-page summaries.
+ * The floating element is attached to <body>, so it is not clipped by
+ * Butterfly's overflow-hidden article cards.
+ */
+.summary-tooltip-target {
+  cursor: help;
+}
+
+.summary-tooltip-target:focus-visible {
+  outline: 2px solid var(--btn-bg);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+#summary-detail-tooltip {
+  position: fixed;
+  z-index: 10000;
+  width: max-content;
+  max-width: min(440px, calc(100vw - 24px));
+  padding: 13px 16px;
+  border: 1px solid rgba(62, 125, 214, 0.22);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 10px 34px rgba(27, 54, 93, 0.22);
+  color: #26364a;
+  font-size: 14px;
+  line-height: 1.7;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(5px);
+  transition:
+    opacity 0.16s ease,
+    transform 0.16s ease;
+  backdrop-filter: blur(12px);
+}
+
+#summary-detail-tooltip.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+[data-theme='dark'] #summary-detail-tooltip {
+  border-color: rgba(128, 182, 255, 0.24);
+  background: rgba(22, 27, 35, 0.96);
+  box-shadow: 0 12px 38px rgba(0, 0, 0, 0.46);
+  color: rgba(255, 255, 255, 0.86);
+}
+
+@media (hover: none), (pointer: coarse) {
+  .summary-tooltip-target {
+    cursor: default;
+  }
+
+  #summary-detail-tooltip {
+    display: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #summary-detail-tooltip {
+    transition: none;
+  }
+}

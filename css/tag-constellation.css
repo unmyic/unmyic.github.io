@@ -1,0 +1,134 @@
+.tag-constellation-head {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 26px;
+  padding: 25px;
+  border: 1px solid rgba(91, 190, 255, .34);
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(236,248,255,.9), rgba(226,235,255,.82));
+  box-shadow: 0 14px 34px rgba(25,69,108,.12);
+}
+
+.tag-constellation-head::after {
+  position: absolute;
+  top: -80px;
+  right: -60px;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(88,198,255,.28), transparent 68%);
+  content: '';
+  pointer-events: none;
+}
+
+.tag-constellation-kicker {
+  color: #3886b7;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .16em;
+}
+
+.tag-constellation-title {
+  margin: 5px 0 4px;
+  color: #173650;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.tag-constellation-meta {
+  color: rgba(30,59,82,.62);
+  font-size: 12px;
+}
+
+.tag-constellation-search {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  margin-top: 18px;
+  padding: 11px 15px;
+  border: 1px solid rgba(62,151,210,.3);
+  border-radius: 12px;
+  outline: none;
+  background: rgba(255,255,255,.62);
+  color: #173650;
+  transition: border-color .25s ease, box-shadow .25s ease;
+}
+
+.tag-constellation-search:focus {
+  border-color: #55bfff;
+  box-shadow: 0 0 0 4px rgba(85,191,255,.14);
+}
+
+#page .tag-cloud-list.tag-constellation-ready {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  text-align: left !important;
+}
+
+#page .tag-cloud-list.tag-constellation-ready > a {
+  --tag-hue: 205;
+  --tag-scale: 1;
+  position: relative;
+  display: flex;
+  min-height: 104px;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 17px;
+  border: 1px solid hsl(var(--tag-hue) 75% 66% / .35);
+  border-radius: 17px;
+  background:
+    radial-gradient(circle at 85% 12%, hsl(var(--tag-hue) 90% 70% / .22), transparent 35%),
+    rgba(247,252,255,.82);
+  box-shadow: 0 9px 23px rgba(25,68,103,.1);
+  color: hsl(var(--tag-hue) 48% 34%) !important;
+  font-size: 14px !important;
+  transform: translateY(0);
+  transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease;
+}
+
+#page .tag-cloud-list.tag-constellation-ready > a::before {
+  color: hsl(var(--tag-hue) 76% 53%);
+  font-size: 18px;
+  font-weight: 800;
+  content: '#';
+}
+
+#page .tag-cloud-list.tag-constellation-ready > a::after {
+  align-self: flex-end;
+  color: hsl(var(--tag-hue) 55% 42% / .65);
+  font-family: "Font Awesome 7 Free", "Font Awesome 6 Free";
+  font-size: 11px;
+  font-weight: 900;
+  content: '\f061';
+}
+
+#page .tag-cloud-list.tag-constellation-ready > a:hover {
+  border-color: hsl(var(--tag-hue) 86% 58% / .72);
+  box-shadow: 0 15px 32px hsl(var(--tag-hue) 45% 35% / .2), 0 0 20px hsl(var(--tag-hue) 85% 65% / .15);
+  transform: translateY(-6px) scale(var(--tag-scale));
+}
+
+#page .tag-cloud-list.tag-constellation-ready > a.is-hidden { display: none; }
+
+[data-theme='dark'] .tag-constellation-head {
+  background: linear-gradient(135deg, rgba(10,31,49,.94), rgba(12,20,40,.94));
+  box-shadow: 0 15px 36px rgba(0,0,0,.32), inset 0 0 28px rgba(52,164,230,.07);
+}
+[data-theme='dark'] .tag-constellation-title { color: #e9f8ff; text-shadow: 0 0 15px rgba(68,205,255,.3); }
+[data-theme='dark'] .tag-constellation-meta { color: rgba(216,240,255,.65); }
+[data-theme='dark'] .tag-constellation-search { background: rgba(4,18,31,.62); color: #eaf9ff; }
+[data-theme='dark'] #page .tag-cloud-list.tag-constellation-ready > a {
+  background: radial-gradient(circle at 85% 12%, hsl(var(--tag-hue) 90% 62% / .22), transparent 38%), rgba(7,22,37,.9);
+  color: hsl(var(--tag-hue) 88% 84%) !important;
+  box-shadow: 0 10px 25px rgba(0,0,0,.3), inset 0 0 18px hsl(var(--tag-hue) 80% 55% / .05);
+}
+
+@media (max-width: 600px) {
+  #page .tag-cloud-list.tag-constellation-ready { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+  #page .tag-cloud-list.tag-constellation-ready > a { min-height: 92px; padding: 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #page .tag-cloud-list.tag-constellation-ready > a { transition: none; }
+}

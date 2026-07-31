@@ -1,0 +1,87 @@
+/* 首页文章卡片：访客可在每行一篇与每行两篇之间切换。 */
+#post-layout-toggle .post-layout-icon {
+  display: inline-block;
+  transition: transform 0.28s ease;
+}
+
+#post-layout-toggle[aria-pressed='true'] .post-layout-icon {
+  transform: rotate(90deg);
+}
+
+@media (min-width: 901px) {
+  #recent-posts.post-layout-two > .recent-post-items {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  #recent-posts.post-layout-two .recent-post-item {
+    flex-direction: column;
+    align-items: stretch;
+    height: auto;
+    min-height: 440px;
+    margin-bottom: 0;
+  }
+
+  #recent-posts.post-layout-two .recent-post-item .post_cover,
+  #recent-posts.post-layout-two .recent-post-item .post_cover.right {
+    order: 0;
+    width: 100%;
+    height: 220px;
+    min-height: 220px;
+  }
+
+  #recent-posts.post-layout-two .recent-post-item > .recent-post-info {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    padding: 24px 28px 28px;
+  }
+
+  #recent-posts.post-layout-two .recent-post-item > .recent-post-info > .article-title {
+    font-size: 1.28em;
+    -webkit-line-clamp: 2;
+  }
+
+  #recent-posts.post-layout-two .recent-post-item > .recent-post-info > .content {
+    -webkit-line-clamp: 3;
+  }
+
+  /* 奇数篇时最后一篇横跨整行，恢复横向卡片，避免留下空白格。 */
+  #recent-posts.post-layout-two
+    .recent-post-item:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    min-height: 0;
+    height: 16.8em;
+  }
+
+  #recent-posts.post-layout-two
+    .recent-post-item:last-child:nth-child(odd)
+    .post_cover {
+    width: 42%;
+    height: 100%;
+    min-height: 0;
+  }
+
+  #recent-posts.post-layout-two
+    .recent-post-item:last-child:nth-child(odd)
+    > .recent-post-info {
+    width: 58%;
+    padding: 0 40px;
+  }
+}
+
+@media (max-width: 900px) {
+  #post-layout-toggle {
+    display: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #post-layout-toggle .post-layout-icon {
+    transition: none;
+  }
+}

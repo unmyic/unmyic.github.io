@@ -1,0 +1,69 @@
+/* 页脚格言：只保留文字内容，并直接融入 Butterfly 页脚。 */
+#footer {
+  background: transparent !important;
+}
+
+[data-theme='dark'] #footer {
+  background: transparent !important;
+}
+
+#ft.footer-quote {
+  width: min(1100px, calc(100% - 32px));
+  margin: 0 auto 14px;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+}
+
+#ft .footer-quote-title {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+  margin-bottom: 5px;
+  color: #bfdbfe;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+#ft .footer-quote-title i {
+  font-size: 12px;
+}
+
+#ft blockquote {
+  margin: 0;
+  padding: 0;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: inherit;
+  font-size: 14px;
+  font-style: normal;
+  line-height: 1.8;
+  opacity: 0.88;
+  overflow-wrap: anywhere;
+  text-align: justify;
+  text-align-last: left;
+  text-indent: 2em;
+  text-justify: inter-ideograph;
+  word-break: normal;
+}
+
+@media (max-width: 600px) {
+  #footer {
+    background: transparent !important;
+  }
+
+  [data-theme='dark'] #footer {
+    background: transparent !important;
+  }
+
+  #ft.footer-quote {
+    margin-bottom: 12px;
+  }
+
+  #ft blockquote {
+    font-size: 12px;
+    line-height: 1.7;
+  }
+}

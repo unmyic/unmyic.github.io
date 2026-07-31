@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">GameKeyShield</title>
+  <desc id="desc">A blue keyboard shortcut passing through a protective shield.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#071625"/>
+      <stop offset=".5" stop-color="#102c4a"/>
+      <stop offset="1" stop-color="#161d3c"/>
+    </linearGradient>
+    <linearGradient id="shield" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#62d8ff"/>
+      <stop offset="1" stop-color="#6574ff"/>
+    </linearGradient>
+    <linearGradient id="key" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#244768"/>
+      <stop offset="1" stop-color="#12283e"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="18" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000814" flood-opacity=".55"/>
+    </filter>
+    <pattern id="grid" width="54" height="54" patternUnits="userSpaceOnUse">
+      <path d="M54 0H0V54" fill="none" stroke="#79cfff" stroke-opacity=".055"/>
+    </pattern>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#background)"/>
+  <rect width="1600" height="900" fill="url(#grid)"/>
+  <circle cx="1260" cy="130" r="270" fill="#5269ff" opacity=".12"/>
+  <circle cx="250" cy="790" r="360" fill="#28c8ff" opacity=".1"/>
+  <path d="M80 690C410 530 610 760 920 610s420-160 650-54" fill="none" stroke="#6bdcff" stroke-opacity=".12" stroke-width="2"/>
+  <path d="M120 735C430 575 650 810 950 660s390-145 560-80" fill="none" stroke="#707cff" stroke-opacity=".1" stroke-width="2"/>
+
+  <g transform="translate(800 405)" filter="url(#shadow)">
+    <path d="M0-250C112-176 217-165 300-147v189c0 208-120 331-300 413C-180 373-300 250-300 42v-189c83-18 188-29 300-103Z"
+          fill="#081d31" stroke="url(#shield)" stroke-width="14"/>
+    <path d="M0-203C88-148 169-136 235-121V37c0 164-87 264-235 339C-148 301-235 201-235 37v-158c66-15 147-27 235-82Z"
+          fill="url(#shield)" opacity=".13"/>
+    <path d="M-100 50l70 70L125-52" fill="none" stroke="#80e7ff" stroke-width="27" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>
+  </g>
+
+  <g font-family="Segoe UI,Arial,sans-serif" font-weight="700" text-anchor="middle" filter="url(#shadow)">
+    <g transform="translate(205 330)">
+      <rect width="210" height="126" rx="25" fill="url(#key)" stroke="#67cbff" stroke-opacity=".58" stroke-width="3"/>
+      <rect x="12" y="12" width="186" height="96" rx="18" fill="none" stroke="#fff" stroke-opacity=".07"/>
+      <text x="105" y="79" fill="#e8f8ff" font-size="43">ALT</text>
+    </g>
+    <text x="455" y="407" fill="#6cdaff" font-size="54">+</text>
+    <g transform="translate(500 330)">
+      <rect width="126" height="126" rx="25" fill="url(#key)" stroke="#67cbff" stroke-opacity=".58" stroke-width="3"/>
+      <rect x="12" y="12" width="102" height="96" rx="18" fill="none" stroke="#fff" stroke-opacity=".07"/>
+      <text x="63" y="80" fill="#e8f8ff" font-size="48">A</text>
+    </g>
+    <path d="M650 393h90" stroke="#70dcff" stroke-width="8" stroke-linecap="round" opacity=".72"/>
+    <path d="m724 369 29 24-29 24" fill="none" stroke="#70dcff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" opacity=".72"/>
+    <g transform="translate(1125 330)">
+      <rect width="210" height="126" rx="25" fill="url(#key)" stroke="#7d8cff" stroke-opacity=".72" stroke-width="3"/>
+      <rect x="12" y="12" width="186" height="96" rx="18" fill="none" stroke="#fff" stroke-opacity=".07"/>
+      <text x="105" y="80" fill="#f0f1ff" font-size="47">F13</text>
+    </g>
+  </g>
+
+  <g font-family="Segoe UI,Arial,sans-serif">
+    <text x="100" y="728" fill="#f2f9ff" font-size="67" font-weight="750" letter-spacing="2">GAME KEY SHIELD</text>
+    <text x="104" y="782" fill="#86aecb" font-size="25" letter-spacing="7">BLOCK CONFLICTS · KEEP CONTROL</text>
+  </g>
+  <g fill="#72dfff">
+    <circle cx="1408" cy="722" r="4"/><circle cx="1450" cy="690" r="2"/><circle cx="1492" cy="746" r="3"/>
+  </g>
+</svg>

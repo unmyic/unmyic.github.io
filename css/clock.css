@@ -1,0 +1,141 @@
+#header-moment {
+  --hm-accent: #8ed8ff;
+  width: min(430px, calc(100vw - 38px));
+  box-sizing: border-box;
+  margin: 18px auto 12px;
+  padding: 13px 17px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, rgba(20, 42, 75, 0.34), rgba(34, 71, 118, 0.18));
+  box-shadow:
+    0 12px 34px rgba(5, 20, 46, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.9);
+  text-align: left;
+  text-shadow: 0 1px 8px rgba(0, 19, 48, 0.32);
+  backdrop-filter: blur(13px) saturate(125%);
+  -webkit-backdrop-filter: blur(13px) saturate(125%);
+}
+
+.hm-time-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+}
+
+.hm-period-icon {
+  display: inline-grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  font-size: 20px;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.22));
+}
+
+.hm-clock {
+  color: #fff;
+  font-family:
+    "SFMono-Regular",
+    "Cascadia Code",
+    "Roboto Mono",
+    Consolas,
+    monospace;
+  font-size: clamp(25px, 4vw, 34px);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+  line-height: 1.1;
+}
+
+.hm-context-row {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin-top: 7px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 12px;
+}
+
+.hm-divider {
+  width: 3px;
+  height: 3px;
+  flex: 0 0 3px;
+  border-radius: 50%;
+  background: var(--hm-accent);
+  box-shadow: 0 0 9px var(--hm-accent);
+}
+
+.hm-progress-row {
+  display: grid;
+  grid-template-columns: auto minmax(70px, 1fr) 38px;
+  align-items: center;
+  gap: 9px;
+  margin-top: 10px;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 10px;
+}
+
+.hm-progress-track {
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.hm-progress-fill {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #63c9ff, #c8efff);
+  box-shadow: 0 0 9px rgba(99, 201, 255, 0.7);
+  transition: width 0.4s ease;
+}
+
+.hm-progress-value {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+#header-moment[data-period='evening'],
+#header-moment[data-period='night'] {
+  --hm-accent: #b9b7ff;
+  background:
+    linear-gradient(135deg, rgba(17, 24, 58, 0.48), rgba(48, 43, 91, 0.25));
+}
+
+#header-moment[data-period='evening'] .hm-progress-fill,
+#header-moment[data-period='night'] .hm-progress-fill {
+  background: linear-gradient(90deg, #8da8ff, #d8ccff);
+  box-shadow: 0 0 9px rgba(157, 165, 255, 0.68);
+}
+
+@media (max-width: 600px) {
+  #header-moment {
+    width: min(360px, calc(100vw - 30px));
+    margin-top: 14px;
+    padding: 11px 14px 10px;
+    border-radius: 16px;
+  }
+
+  .hm-context-row {
+    gap: 7px;
+    font-size: 11px;
+  }
+
+  .hm-greeting {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hm-progress-fill {
+    transition: none;
+  }
+}

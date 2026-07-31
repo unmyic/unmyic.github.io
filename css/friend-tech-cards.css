@@ -1,0 +1,421 @@
+#page .flink.friend-tech-ready .friend-group-heading {
+  position: relative;
+  display: grid;
+  width: min(100%, 560px);
+  min-height: 72px;
+  grid-template-columns: 42px auto minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  margin: 8px auto 20px;
+  padding: 12px 17px;
+  border: 1px solid rgba(92, 195, 255, .34);
+  border-radius: 15px;
+  background:
+    radial-gradient(circle at 8% 15%, rgba(92, 203, 255, .2), transparent 30%),
+    linear-gradient(135deg, rgba(242, 251, 255, .82), rgba(228, 241, 255, .78));
+  box-shadow: 0 10px 26px rgba(24, 74, 112, .1);
+}
+
+#page .flink.friend-tech-ready .friend-group-heading::after {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 26px;
+  height: 8px;
+  border-top: 1px solid rgba(61, 172, 232, .48);
+  border-right: 1px solid rgba(61, 172, 232, .48);
+  content: '';
+}
+
+.friend-group-symbol {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 1px solid rgba(79, 190, 247, .35);
+  border-radius: 12px;
+  background: linear-gradient(145deg, rgba(80, 191, 249, .2), rgba(91, 119, 235, .12));
+  color: #2b94cb;
+  font-size: 16px;
+  box-shadow: inset 0 0 12px rgba(86, 203, 255, .08);
+}
+
+#page .flink.friend-tech-ready .friend-group-heading > h2 {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: #183a54;
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+#page .flink.friend-tech-ready .friend-group-heading > h2::before,
+#page .flink.friend-tech-ready .friend-group-heading > h2::after {
+  display: none;
+}
+
+#page .flink.friend-tech-ready .friend-group-heading > h2 .headerlink {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+#page .flink.friend-tech-ready .friend-group-heading > .flink-desc {
+  overflow: hidden;
+  margin: 0;
+  padding: 2px 0 2px 16px;
+  border-left: 1px solid rgba(69, 153, 205, .25);
+  color: rgba(35, 68, 93, .58);
+  font-size: 11px;
+  line-height: 1.5;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#page .flink.friend-tech-ready .flink-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  margin: 22px 0 38px;
+  padding: 0;
+}
+
+#page .flink.friend-tech-ready .flink-list-item {
+  position: relative;
+  float: none;
+  overflow: visible;
+  width: auto;
+  height: 292px;
+  margin: 0;
+  background: transparent;
+}
+
+#page .flink.friend-tech-ready .flink-list-item:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+  width: min(100%, 560px);
+  justify-self: center;
+}
+
+#page .flink.friend-tech-ready .friend-reference-list {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  overflow: visible;
+}
+
+#page .flink.friend-tech-ready .friend-reference-list > .flink-list-item,
+#page .flink.friend-tech-ready .friend-reference-list > .flink-list-item:last-child:nth-child(odd) {
+  z-index: 1;
+  width: auto;
+  height: 226px;
+  grid-column: auto;
+  justify-self: stretch;
+  transition: opacity .3s ease, transform .38s cubic-bezier(.2,.75,.25,1), filter .3s ease;
+}
+
+#page .flink.friend-tech-ready .friend-reference-list .friend-card-shot,
+#page .flink.friend-tech-ready .friend-reference-list .friend-card-scan {
+  height: 118px;
+  transition: height .36s cubic-bezier(.2,.75,.25,1);
+}
+
+#page .flink.friend-tech-ready .friend-reference-list .flink-item-icon {
+  top: 90px;
+  left: 15px;
+  width: 52px;
+  height: 52px;
+  transition: top .36s cubic-bezier(.2,.75,.25,1), width .3s ease, height .3s ease, transform .4s ease;
+}
+
+#page .flink.friend-tech-ready .friend-reference-list .flink-item-name {
+  top: 132px;
+  right: 14px;
+  left: 76px;
+  font-size: 15px;
+  transition: top .36s cubic-bezier(.2,.75,.25,1), font-size .3s ease;
+}
+
+#page .flink.friend-tech-ready .friend-reference-list .flink-item-desc {
+  top: 159px;
+  right: 14px;
+  left: 76px;
+  font-size: 10px;
+  -webkit-line-clamp: 2;
+  transition: top .36s cubic-bezier(.2,.75,.25,1), font-size .3s ease;
+}
+
+#page .flink.friend-tech-ready .friend-reference-list .friend-card-footer {
+  right: 14px;
+  bottom: 9px;
+  font-size: 8px;
+}
+
+@media (min-width: 761px) {
+  #page .flink.friend-tech-ready .friend-reference-list > .flink-list-item:nth-child(1) {
+    transform-origin: left top;
+  }
+
+  #page .flink.friend-tech-ready .friend-reference-list > .flink-list-item:nth-child(2) {
+    transform-origin: center top;
+  }
+
+  #page .flink.friend-tech-ready .friend-reference-list > .flink-list-item:nth-child(3) {
+    transform-origin: right top;
+  }
+
+  #page .flink.friend-tech-ready .friend-reference-list:has(> .flink-list-item:hover) > .flink-list-item:not(:hover) {
+    opacity: .52;
+    filter: saturate(.72);
+    transform: scale(.97);
+  }
+
+  #page .flink.friend-tech-ready .friend-reference-list > .flink-list-item:hover {
+    z-index: 5;
+    filter: saturate(1.05);
+    transform: scale(1.16);
+  }
+}
+
+#page .flink.friend-tech-ready .flink-list-item > a {
+  --friend-accent: #54c8ff;
+  position: relative;
+  display: block;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 1px solid rgba(92, 195, 255, 0.55);
+  border-radius: 15px;
+  background: linear-gradient(155deg, rgba(245,252,255,.97), rgba(225,242,255,.95));
+  box-shadow: 0 15px 34px rgba(23,67,105,.18), inset 0 0 0 1px rgba(255,255,255,.74);
+  color: #20384f !important;
+  text-align: left;
+  transition: transform .3s ease, border-color .3s ease, box-shadow .3s ease;
+}
+
+#page .flink.friend-tech-ready .flink-list-item > a::before,
+#page .flink.friend-tech-ready .flink-list-item > a::after {
+  position: absolute;
+  z-index: 7;
+  width: 42px;
+  height: 14px;
+  content: '';
+  pointer-events: none;
+}
+
+#page .flink.friend-tech-ready .flink-list-item > a::before {
+  top: 8px;
+  left: 9px;
+  border-top: 2px solid var(--friend-accent);
+  border-left: 2px solid var(--friend-accent);
+}
+
+#page .flink.friend-tech-ready .flink-list-item > a::after {
+  right: 9px;
+  bottom: 8px;
+  border-right: 2px solid var(--friend-accent);
+  border-bottom: 2px solid var(--friend-accent);
+}
+
+#page .flink.friend-tech-ready .flink-list-item > a:hover {
+  border-color: rgba(95,213,255,.92);
+  box-shadow: 0 20px 44px rgba(20,92,143,.26), 0 0 25px rgba(70,194,255,.2);
+  transform: translateY(-7px);
+}
+
+.friend-card-shot {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 166px;
+  border-bottom: 1px solid rgba(82,179,236,.42);
+  background: radial-gradient(circle at 78% 18%, rgba(86,207,255,.52), transparent 30%), linear-gradient(135deg,#183b5b,#225f82);
+  clip-path: polygon(0 0,100% 0,100% 86%,68% 100%,0 92%);
+}
+
+.friend-card-shot::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,transparent 46%,rgba(4,22,37,.7)), repeating-linear-gradient(90deg,transparent 0 38px,rgba(101,213,255,.08) 39px 40px);
+  content: '';
+}
+
+.friend-card-shot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  filter: saturate(.82) contrast(1.04);
+  transition: transform .7s ease, filter .45s ease;
+}
+
+.friend-card-shot.is-fallback img { display: none; }
+.flink-list-item > a:hover .friend-card-shot img { transform: scale(1.055); filter: saturate(1.05); }
+
+#page .flink.friend-tech-ready .flink-item-icon {
+  position: absolute;
+  z-index: 8;
+  top: 129px;
+  left: 22px;
+  width: 64px;
+  height: 64px;
+  margin: 0;
+  border: 3px solid rgba(229,249,255,.96);
+  border-radius: 50%;
+  background: #e8f7ff;
+  box-shadow: 0 0 0 2px rgba(72,196,255,.72), 0 7px 18px rgba(14,55,84,.28);
+  transition: transform .4s ease;
+}
+
+#page .flink.friend-tech-ready .flink-list-item:hover .flink-item-icon {
+  width: 64px;
+  margin-left: 0;
+  transform: rotate(6deg) scale(1.06);
+}
+
+#page .flink.friend-tech-ready .flink-item-icon img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+#page .flink.friend-tech-ready .flink-item-name {
+  position: absolute;
+  z-index: 6;
+  top: 174px;
+  right: 22px;
+  left: 101px;
+  overflow: hidden;
+  color: #18334c;
+  font-size: 18px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#page .flink.friend-tech-ready .flink-item-desc {
+  position: absolute;
+  z-index: 6;
+  top: 207px;
+  right: 22px;
+  left: 101px;
+  display: -webkit-box;
+  overflow: hidden;
+  color: rgba(32,56,79,.68);
+  font-size: 12px;
+  line-height: 1.55;
+  white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.friend-card-footer {
+  position: absolute;
+  z-index: 6;
+  right: 21px;
+  bottom: 13px;
+  color: #2586b5;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: .08em;
+}
+
+.friend-card-scan {
+  position: absolute;
+  z-index: 5;
+  top: 0;
+  left: -30%;
+  width: 18%;
+  height: 166px;
+  background: linear-gradient(90deg,transparent,rgba(184,238,255,.24),transparent);
+  transform: skewX(-18deg);
+}
+
+.flink-list-item > a:hover .friend-card-scan { left: 112%; transition: left .9s ease; }
+
+[data-theme='dark'] #page .flink.friend-tech-ready .flink-list-item > a {
+  background: linear-gradient(155deg,rgba(9,28,45,.97),rgba(8,17,32,.97));
+  box-shadow: 0 17px 38px rgba(0,0,0,.42), inset 0 0 26px rgba(45,153,216,.08);
+}
+[data-theme='dark'] #page .flink.friend-tech-ready .friend-group-heading {
+  border-color: rgba(87, 200, 255, .25);
+  background:
+    radial-gradient(circle at 8% 15%, rgba(65, 191, 255, .14), transparent 32%),
+    linear-gradient(135deg, rgba(9, 29, 46, .88), rgba(8, 18, 34, .88));
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .26), inset 0 0 20px rgba(56, 172, 234, .035);
+}
+[data-theme='dark'] #page .flink.friend-tech-ready .friend-group-heading > h2 {
+  color: #e8f8ff;
+  text-shadow: 0 0 12px rgba(71, 203, 255, .2);
+}
+[data-theme='dark'] #page .flink.friend-tech-ready .friend-group-heading > .flink-desc {
+  border-left-color: rgba(119, 210, 255, .2);
+  color: rgba(211, 238, 251, .58);
+}
+[data-theme='dark'] #page .flink.friend-tech-ready .flink-item-name { color: #eaf9ff; text-shadow: 0 0 10px rgba(76,207,255,.3); }
+[data-theme='dark'] #page .flink.friend-tech-ready .flink-item-desc { color: rgba(215,239,252,.66); }
+[data-theme='dark'] .friend-card-footer { color: #8fddff; }
+
+@media (max-width: 760px) {
+  #page .flink.friend-tech-ready .friend-group-heading {
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: 5px 13px;
+    padding: 12px 15px;
+  }
+  #page .flink.friend-tech-ready .friend-group-heading > .friend-group-symbol {
+    grid-row: 1 / 3;
+  }
+  #page .flink.friend-tech-ready .friend-group-heading > .flink-desc {
+    padding: 0;
+    border-left: 0;
+    text-align: left;
+  }
+  #page .flink.friend-tech-ready .friend-reference-list {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  #page .flink.friend-tech-ready .friend-reference-list > .flink-list-item,
+  #page .flink.friend-tech-ready .friend-reference-list > .flink-list-item:last-child:nth-child(odd) {
+    width: 100%;
+    height: 292px;
+  }
+  #page .flink.friend-tech-ready .friend-reference-list .friend-card-shot,
+  #page .flink.friend-tech-ready .friend-reference-list .friend-card-scan {
+    height: 166px;
+  }
+  #page .flink.friend-tech-ready .friend-reference-list .flink-item-icon {
+    top: 129px;
+    left: 22px;
+    width: 64px;
+    height: 64px;
+  }
+  #page .flink.friend-tech-ready .friend-reference-list .flink-item-name {
+    top: 174px;
+    right: 22px;
+    left: 101px;
+    font-size: 18px;
+  }
+  #page .flink.friend-tech-ready .friend-reference-list .flink-item-desc {
+    top: 207px;
+    right: 22px;
+    left: 101px;
+    font-size: 12px;
+  }
+  #page .flink.friend-tech-ready .friend-reference-list .friend-card-footer {
+    right: 21px;
+    bottom: 13px;
+    font-size: 10px;
+  }
+  #page .flink.friend-tech-ready .flink-list { grid-template-columns: 1fr; gap: 18px; }
+  #page .flink.friend-tech-ready .flink-list-item:last-child:nth-child(odd) { grid-column: auto; width: 100%; }
+  #page .flink.friend-tech-ready .flink-list-item > a:hover { transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #page .flink.friend-tech-ready .flink-list-item > a,
+  .friend-card-shot img,
+  .friend-card-scan { transition: none !important; }
+}

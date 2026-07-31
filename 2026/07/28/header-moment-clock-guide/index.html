@@ -1,0 +1,575 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>为博客添加一个页首时光状态组件：实时时钟、问候与今日进度 | unmyic</title><meta name="author" content="unmyic,unmyic@gmail.com"><meta name="copyright" content="unmyic"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="使用原生 JavaScript 和 CSS 实现一个页首时光状态组件，显示访客本地时间、日期、时段问候与今日进度，并介绍 Hexo Butterfly、普通网页及 PJAX 环境中的部署方式。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="为博客添加一个页首时光状态组件：实时时钟、问候与今日进度">
+<meta property="og:url" content="https://blog.unmyic.com/2026/07/28/header-moment-clock-guide/index.html">
+<meta property="og:site_name" content="unmyic">
+<meta property="og:description" content="使用原生 JavaScript 和 CSS 实现一个页首时光状态组件，显示访客本地时间、日期、时段问候与今日进度，并介绍 Hexo Butterfly、普通网页及 PJAX 环境中的部署方式。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog.unmyic.com/img/post-covers/pixiv5.jpg">
+<meta property="article:published_time" content="2026-07-28T08:44:38.000Z">
+<meta property="article:modified_time" content="2026-07-28T09:08:43.224Z">
+<meta property="article:author" content="unmyic">
+<meta property="article:tag" content="Hexo">
+<meta property="article:tag" content="JavaScript">
+<meta property="article:tag" content="CSS">
+<meta property="article:tag" content="博客组件">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://blog.unmyic.com/img/post-covers/pixiv5.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "为博客添加一个页首时光状态组件：实时时钟、问候与今日进度",
+  "url": "https://blog.unmyic.com/2026/07/28/header-moment-clock-guide/",
+  "image": "https://blog.unmyic.com/img/post-covers/pixiv5.jpg",
+  "datePublished": "2026-07-28T08:44:38.000Z",
+  "dateModified": "2026-07-28T09:08:43.224Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "unmyic",
+      "url": "https://blog.unmyic.com/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="https://blog.unmyic.com/2026/07/28/header-moment-clock-guide/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":400,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":500,"languages":{"author":"作者: unmyic","link":"链接: ","source":"来源: unmyic","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: true,
+  islazyloadPlugin: true,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '为博客添加一个页首时光状态组件：实时时钟、问候与今日进度',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/self/dracula.css"><link rel="stylesheet" href="/css/custom-footer.css?v=6"><link rel="stylesheet" href="/css/hero-scroll.css?v=11"><link rel="stylesheet" href="/css/post-layout-switcher.css?v=1"><link rel="stylesheet" href="/css/theme-atmosphere.css?v=1"><link rel="stylesheet" href="/css/category-tiles.css?v=3"><link rel="stylesheet" href="/css/friend-tech-cards.css?v=4"><link rel="stylesheet" href="/css/tag-constellation.css?v=1"><link rel="stylesheet" href="/css/command-palette.css?v=2"><link rel="stylesheet" href="/css/project-showcase.css?v=1"><link rel="stylesheet" href="/css/summary-tooltip.css?v=1"><link rel="stylesheet" href="/css/site-changelog.css?v=1"><link rel="stylesheet" href="/css/runtime.css?v=3"><link rel="stylesheet" href="/css/toc-katex.css?v=1"><link rel="stylesheet" href="/css/music-player.css?v=10"><meta name="generator" content="Hexo 7.3.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><script>(()=>{
+  const $loadingBox = document.getElementById('loading-box')
+  const $body = document.body
+  const preloader = {
+    endLoading: () => {
+      if ($loadingBox.classList.contains('loaded')) return
+      $body.style.overflow = ''
+      $loadingBox.classList.add('loaded')
+    },
+    initLoading: () => {
+      $body.style.overflow = 'hidden'
+      $loadingBox.classList.remove('loaded')
+    }
+  }
+
+  preloader.initLoading()
+
+  if (document.readyState === 'complete') {
+    preloader.endLoading()
+  } else {
+    window.addEventListener('load', preloader.endLoading)
+    document.addEventListener('DOMContentLoaded', preloader.endLoading)
+    // Add timeout protection: force end after 7 seconds
+    setTimeout(preloader.endLoading, 7000)
+  }
+
+  if (true) {
+    btf.addGlobalFn('pjaxSend', preloader.initLoading, 'preloader_init')
+    btf.addGlobalFn('pjaxComplete', preloader.endLoading, 'preloader_end')
+  }
+})()</script><div id="web_bg" style="background-image: url(/img/banner-ocean-v2-2k.webp);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">9</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">25</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-archive"></i><span> 文章</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-comments"></i><span> 社交</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-globe"></i><span> 网站</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/log/"><i class="fa-fw fas fa-hammer"></i><span> 日志</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/post-covers/pixiv5.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/weblogo.svg" alt="Logo"></a><a class="nav-page-title" href="/"><span class="site-name">为博客添加一个页首时光状态组件：实时时钟、问候与今日进度</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-archive"></i><span> 文章</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-comments"></i><span> 社交</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-globe"></i><span> 网站</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/log/"><i class="fa-fw fas fa-hammer"></i><span> 日志</span></a></li></ul></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">为博客添加一个页首时光状态组件：实时时钟、问候与今日进度</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-07-28T08:44:38.000Z" title="发表于 2026-07-28 16:44:38">2026-07-28</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-07-28T09:08:43.224Z" title="更新于 2026-07-28 17:08:43">2026-07-28</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Web-%E5%BC%80%E5%8F%91/">Web 开发</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">3.1k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>13分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><div id="post-outdate-notice" data="{&quot;limitDay&quot;:365,&quot;messagePrev&quot;:&quot;距离本文最后更新已经&quot;,&quot;messageNext&quot;:&quot;天，部分内容可能已经过时。&quot;,&quot;postUpdate&quot;:&quot;2026-07-28 17:08:43&quot;}" hidden></div><h2 id="前言">前言</h2>
+<p>在博客的页首区域，除了站点标题和一句副标题，还可以放置一些与访问时刻有关的信息。相比必须请求定位和第三方接口的天气组件，一个只依赖浏览器本地时间的“时光状态组件”更加轻量，也不会带来定位权限和接口失效问题。</p>
+<p>这个组件会显示：</p>
+<ul>
+<li>访客设备所在时区的实时时间</li>
+<li>当前日期与星期</li>
+<li>随早晨、上午、中午、下午、晚上和深夜变化的问候</li>
+<li>今天已经过去的百分比</li>
+<li>根据白天或夜晚自动变化的色彩</li>
+<li>移动端布局与“减少动态效果”设置</li>
+<li>PJAX 页面切换后的自动恢复</li>
+</ul>
+<blockquote>
+<p>本站目前暂时停用了页首展示，因为我还在调整它最合适的位置；源码和功能仍然完整保留。你可以把它放在首页页首、侧栏、导航栏或页脚。</p>
+</blockquote>
+<p>这个组件同样<strong>不是 Hexo 专属</strong>。核心只使用原生 HTML、CSS 和 JavaScript，任何能够引入静态文件的网页都可以使用。</p>
+<span id="more"></span>
+<hr>
+<h2 id="一、组件的设计思路">一、组件的设计思路</h2>
+<h3 id="1-不依赖服务器时间">1. 不依赖服务器时间</h3>
+<p>组件通过浏览器的 <code>Date</code> 获取访客设备时间：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-keyword">var</span> now = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>();<br><span class="hljs-keyword">var</span> hour = now.<span class="hljs-title function_">getHours</span>();<br></code></pre></td></tr></table></figure>
+<p>因此，中国访客看到北京时间，身处其他时区的访客则会看到自己的本地时间。组件不会请求服务器，也不需要配置时区。</p>
+<h3 id="2-根据时段改变问候">2. 根据时段改变问候</h3>
+<p>一天被划分为多个时段，每个时段有不同图标、问候和配色。例如晚上会显示月亮，深夜会提醒访客注意休息。</p>
+<h3 id="3-计算今日进度">3. 计算今日进度</h3>
+<p>将当前的时、分、秒转换为从零点开始经过的秒数，再除以一天的 <code>86400</code> 秒：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-keyword">var</span> secondsToday =<br>  hour * <span class="hljs-number">3600</span> +<br>  now.<span class="hljs-title function_">getMinutes</span>() * <span class="hljs-number">60</span> +<br>  now.<span class="hljs-title function_">getSeconds</span>();<br><br><span class="hljs-keyword">var</span> progress = (secondsToday / <span class="hljs-number">86400</span>) * <span class="hljs-number">100</span>;<br></code></pre></td></tr></table></figure>
+<p>这个数值会同时更新进度条和右侧百分比。</p>
+<h3 id="4-为什么暂时不加入天气">4. 为什么暂时不加入天气</h3>
+<p>天气组件通常需要：</p>
+<ul>
+<li>请求浏览器定位权限，或者让访客手动选择城市</li>
+<li>调用 Open-Meteo、和风天气等第三方接口</li>
+<li>处理接口限额、跨域、网络错误和缓存</li>
+<li>向访客说明定位数据的用途</li>
+</ul>
+<p>对于博客页首而言，这些成本可能超过天气信息本身带来的价值。因此当前版本只提供稳定、无权限请求的时间信息，天气适合作为后续可选模块。</p>
+<hr>
+<h2 id="二、源码下载">二、源码下载</h2>
+<ul>
+<li><a href="/downloads/header-moment/unmyic-header-moment.zip">下载完整源码包（ZIP）</a></li>
+</ul>
+<p>压缩包包含：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs text">unmyic-header-moment/<br>├── clock.js<br>├── clock.css<br>├── butterfly-inject.yml<br>└── README.txt<br></code></pre></td></tr></table></figure>
+<p>为了便于直接复制，下面同时贴出完整源码。本站的长代码块会限制显示高度，可以点击展开或使用右上角复制按钮。</p>
+<hr>
+<h2 id="三、完整-JavaScript">三、完整 JavaScript</h2>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 首页页首时光状态组件。</span><br><span class="hljs-comment"> * 时间使用访客设备的本地时区，不请求定位或第三方天气服务。</span><br><span class="hljs-comment"> */</span><br>(<span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;<br>  <span class="hljs-string">&#x27;use strict&#x27;</span>;<br><br>  <span class="hljs-keyword">var</span> root = <span class="hljs-literal">null</span>;<br>  <span class="hljs-keyword">var</span> timerId = <span class="hljs-literal">null</span>;<br><br>  <span class="hljs-keyword">function</span> <span class="hljs-title function_">pad</span>(<span class="hljs-params">number</span>) &#123;<br>    <span class="hljs-keyword">return</span> <span class="hljs-title class_">String</span>(number).<span class="hljs-title function_">padStart</span>(<span class="hljs-number">2</span>, <span class="hljs-string">&#x27;0&#x27;</span>);<br>  &#125;<br><br>  <span class="hljs-keyword">function</span> <span class="hljs-title function_">getPeriod</span>(<span class="hljs-params">hour</span>) &#123;<br>    <span class="hljs-keyword">if</span> (hour &gt;= <span class="hljs-number">5</span> &amp;&amp; hour &lt; <span class="hljs-number">9</span>) &#123;<br>      <span class="hljs-keyword">return</span> &#123; <span class="hljs-attr">greeting</span>: <span class="hljs-string">&#x27;早上好，愿今天从容展开&#x27;</span>, <span class="hljs-attr">icon</span>: <span class="hljs-string">&#x27;🌅&#x27;</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;morning&#x27;</span> &#125;;<br>    &#125;<br>    <span class="hljs-keyword">if</span> (hour &gt;= <span class="hljs-number">9</span> &amp;&amp; hour &lt; <span class="hljs-number">12</span>) &#123;<br>      <span class="hljs-keyword">return</span> &#123; <span class="hljs-attr">greeting</span>: <span class="hljs-string">&#x27;上午好，保持好奇与专注&#x27;</span>, <span class="hljs-attr">icon</span>: <span class="hljs-string">&#x27;☀️&#x27;</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;day&#x27;</span> &#125;;<br>    &#125;<br>    <span class="hljs-keyword">if</span> (hour &gt;= <span class="hljs-number">12</span> &amp;&amp; hour &lt; <span class="hljs-number">14</span>) &#123;<br>      <span class="hljs-keyword">return</span> &#123; <span class="hljs-attr">greeting</span>: <span class="hljs-string">&#x27;中午好，记得稍作休息&#x27;</span>, <span class="hljs-attr">icon</span>: <span class="hljs-string">&#x27;🌤️&#x27;</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;noon&#x27;</span> &#125;;<br>    &#125;<br>    <span class="hljs-keyword">if</span> (hour &gt;= <span class="hljs-number">14</span> &amp;&amp; hour &lt; <span class="hljs-number">18</span>) &#123;<br>      <span class="hljs-keyword">return</span> &#123; <span class="hljs-attr">greeting</span>: <span class="hljs-string">&#x27;下午好，继续探索吧&#x27;</span>, <span class="hljs-attr">icon</span>: <span class="hljs-string">&#x27;⛅&#x27;</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;afternoon&#x27;</span> &#125;;<br>    &#125;<br>    <span class="hljs-keyword">if</span> (hour &gt;= <span class="hljs-number">18</span> &amp;&amp; hour &lt; <span class="hljs-number">23</span>) &#123;<br>      <span class="hljs-keyword">return</span> &#123; <span class="hljs-attr">greeting</span>: <span class="hljs-string">&#x27;晚上好，适合阅读与思考&#x27;</span>, <span class="hljs-attr">icon</span>: <span class="hljs-string">&#x27;🌙&#x27;</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;evening&#x27;</span> &#125;;<br>    &#125;<br>    <span class="hljs-keyword">return</span> &#123; <span class="hljs-attr">greeting</span>: <span class="hljs-string">&#x27;夜深了，也要照顾好自己&#x27;</span>, <span class="hljs-attr">icon</span>: <span class="hljs-string">&#x27;✨&#x27;</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;night&#x27;</span> &#125;;<br>  &#125;<br><br>  <span class="hljs-keyword">function</span> <span class="hljs-title function_">createMoment</span>(<span class="hljs-params"></span>) &#123;<br>    <span class="hljs-keyword">var</span> siteInfo = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;site-info&#x27;</span>);<br>    <span class="hljs-keyword">if</span> (!siteInfo) &#123;<br>      root = <span class="hljs-literal">null</span>;<br>      <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;<br>    &#125;<br><br>    <span class="hljs-keyword">var</span> existing = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;header-moment&#x27;</span>);<br>    <span class="hljs-keyword">if</span> (existing) &#123;<br>      root = existing;<br>      <span class="hljs-keyword">return</span> root;<br>    &#125;<br><br>    root = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElement</span>(<span class="hljs-string">&#x27;section&#x27;</span>);<br>    root.<span class="hljs-property">id</span> = <span class="hljs-string">&#x27;header-moment&#x27;</span>;<br>    root.<span class="hljs-property">className</span> = <span class="hljs-string">&#x27;header-moment&#x27;</span>;<br>    root.<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">&#x27;aria-label&#x27;</span>, <span class="hljs-string">&#x27;当前日期时间与今日进度&#x27;</span>);<br>    root.<span class="hljs-property">title</span> = <span class="hljs-string">&#x27;时间以你的设备时区为准&#x27;</span>;<br>    root.<span class="hljs-property">innerHTML</span> =<br>      <span class="hljs-string">&#x27;&lt;div class=&quot;hm-time-row&quot;&gt;&#x27;</span> +<br>        <span class="hljs-string">&#x27;&lt;span class=&quot;hm-period-icon&quot; aria-hidden=&quot;true&quot;&gt;&lt;/span&gt;&#x27;</span> +<br>        <span class="hljs-string">&#x27;&lt;time class=&quot;hm-clock&quot; aria-label=&quot;当前时间&quot;&gt;&lt;/time&gt;&#x27;</span> +<br>      <span class="hljs-string">&#x27;&lt;/div&gt;&#x27;</span> +<br>      <span class="hljs-string">&#x27;&lt;div class=&quot;hm-context-row&quot;&gt;&#x27;</span> +<br>        <span class="hljs-string">&#x27;&lt;span class=&quot;hm-date&quot;&gt;&lt;/span&gt;&#x27;</span> +<br>        <span class="hljs-string">&#x27;&lt;span class=&quot;hm-divider&quot; aria-hidden=&quot;true&quot;&gt;&lt;/span&gt;&#x27;</span> +<br>        <span class="hljs-string">&#x27;&lt;span class=&quot;hm-greeting&quot;&gt;&lt;/span&gt;&#x27;</span> +<br>      <span class="hljs-string">&#x27;&lt;/div&gt;&#x27;</span> +<br>      <span class="hljs-string">&#x27;&lt;div class=&quot;hm-progress-row&quot; title=&quot;从今天 00:00 到当前时刻&quot;&gt;&#x27;</span> +<br>        <span class="hljs-string">&#x27;&lt;span class=&quot;hm-progress-label&quot;&gt;今日进度&lt;/span&gt;&#x27;</span> +<br>        <span class="hljs-string">&#x27;&lt;span class=&quot;hm-progress-track&quot; aria-hidden=&quot;true&quot;&gt;&#x27;</span> +<br>          <span class="hljs-string">&#x27;&lt;i class=&quot;hm-progress-fill&quot;&gt;&lt;/i&gt;&#x27;</span> +<br>        <span class="hljs-string">&#x27;&lt;/span&gt;&#x27;</span> +<br>        <span class="hljs-string">&#x27;&lt;span class=&quot;hm-progress-value&quot;&gt;&lt;/span&gt;&#x27;</span> +<br>      <span class="hljs-string">&#x27;&lt;/div&gt;&#x27;</span>;<br><br>    <span class="hljs-keyword">var</span> socialIcons = siteInfo.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">&#x27;#site_social_icons&#x27;</span>);<br>    <span class="hljs-keyword">if</span> (socialIcons) &#123;<br>      siteInfo.<span class="hljs-title function_">insertBefore</span>(root, socialIcons);<br>    &#125; <span class="hljs-keyword">else</span> &#123;<br>      siteInfo.<span class="hljs-title function_">appendChild</span>(root);<br>    &#125;<br><br>    <span class="hljs-keyword">return</span> root;<br>  &#125;<br><br>  <span class="hljs-keyword">function</span> <span class="hljs-title function_">updateMoment</span>(<span class="hljs-params"></span>) &#123;<br>    <span class="hljs-keyword">if</span> (!root || !root.<span class="hljs-property">isConnected</span>) &#123;<br>      root = <span class="hljs-title function_">createMoment</span>();<br>    &#125;<br>    <span class="hljs-keyword">if</span> (!root) <span class="hljs-keyword">return</span>;<br><br>    <span class="hljs-keyword">var</span> now = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>();<br>    <span class="hljs-keyword">var</span> hour = now.<span class="hljs-title function_">getHours</span>();<br>    <span class="hljs-keyword">var</span> period = <span class="hljs-title function_">getPeriod</span>(hour);<br>    <span class="hljs-keyword">var</span> secondsToday =<br>      hour * <span class="hljs-number">3600</span> +<br>      now.<span class="hljs-title function_">getMinutes</span>() * <span class="hljs-number">60</span> +<br>      now.<span class="hljs-title function_">getSeconds</span>();<br>    <span class="hljs-keyword">var</span> progress = (secondsToday / <span class="hljs-number">86400</span>) * <span class="hljs-number">100</span>;<br><br>    root.<span class="hljs-property">dataset</span>.<span class="hljs-property">period</span> = period.<span class="hljs-property">name</span>;<br>    root.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">&#x27;.hm-period-icon&#x27;</span>).<span class="hljs-property">textContent</span> = period.<span class="hljs-property">icon</span>;<br>    root.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">&#x27;.hm-clock&#x27;</span>).<span class="hljs-property">textContent</span> =<br>      <span class="hljs-title function_">pad</span>(hour) + <span class="hljs-string">&#x27;:&#x27;</span> + <span class="hljs-title function_">pad</span>(now.<span class="hljs-title function_">getMinutes</span>()) + <span class="hljs-string">&#x27;:&#x27;</span> + <span class="hljs-title function_">pad</span>(now.<span class="hljs-title function_">getSeconds</span>());<br>    root.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">&#x27;.hm-date&#x27;</span>).<span class="hljs-property">textContent</span> =<br>      <span class="hljs-keyword">new</span> <span class="hljs-title class_">Intl</span>.<span class="hljs-title class_">DateTimeFormat</span>(<span class="hljs-string">&#x27;zh-CN&#x27;</span>, &#123;<br>        <span class="hljs-attr">month</span>: <span class="hljs-string">&#x27;long&#x27;</span>,<br>        <span class="hljs-attr">day</span>: <span class="hljs-string">&#x27;numeric&#x27;</span>,<br>        <span class="hljs-attr">weekday</span>: <span class="hljs-string">&#x27;long&#x27;</span><br>      &#125;).<span class="hljs-title function_">format</span>(now);<br>    root.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">&#x27;.hm-greeting&#x27;</span>).<span class="hljs-property">textContent</span> = period.<span class="hljs-property">greeting</span>;<br>    root.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">&#x27;.hm-progress-fill&#x27;</span>).<span class="hljs-property">style</span>.<span class="hljs-property">width</span> =<br>      progress.<span class="hljs-title function_">toFixed</span>(<span class="hljs-number">3</span>) + <span class="hljs-string">&#x27;%&#x27;</span>;<br>    root.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">&#x27;.hm-progress-value&#x27;</span>).<span class="hljs-property">textContent</span> =<br>      progress.<span class="hljs-title function_">toFixed</span>(<span class="hljs-number">1</span>) + <span class="hljs-string">&#x27;%&#x27;</span>;<br>  &#125;<br><br>  <span class="hljs-keyword">function</span> <span class="hljs-title function_">startMoment</span>(<span class="hljs-params"></span>) &#123;<br>    <span class="hljs-title function_">updateMoment</span>();<br>    <span class="hljs-keyword">if</span> (timerId === <span class="hljs-literal">null</span>) &#123;<br>      timerId = <span class="hljs-variable language_">window</span>.<span class="hljs-built_in">setInterval</span>(updateMoment, <span class="hljs-number">1000</span>);<br>    &#125;<br>  &#125;<br><br>  <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">addEventListener</span>(<span class="hljs-string">&#x27;pjax:complete&#x27;</span>, startMoment);<br>  <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">addEventListener</span>(<span class="hljs-string">&#x27;visibilitychange&#x27;</span>, <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;<br>    <span class="hljs-keyword">if</span> (!<span class="hljs-variable language_">document</span>.<span class="hljs-property">hidden</span>) <span class="hljs-title function_">updateMoment</span>();<br>  &#125;);<br><br>  <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">document</span>.<span class="hljs-property">readyState</span> === <span class="hljs-string">&#x27;loading&#x27;</span>) &#123;<br>    <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">addEventListener</span>(<span class="hljs-string">&#x27;DOMContentLoaded&#x27;</span>, startMoment);<br>  &#125; <span class="hljs-keyword">else</span> &#123;<br>    <span class="hljs-title function_">startMoment</span>();<br>  &#125;<br>&#125;)();<br></code></pre></td></tr></table></figure>
+<hr>
+<h2 id="四、完整-CSS">四、完整 CSS</h2>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br></pre></td><td class="code"><pre><code class="hljs css"><span class="hljs-selector-id">#header-moment</span> &#123;<br>  <span class="hljs-attr">--hm-accent</span>: <span class="hljs-number">#8ed8ff</span>;<br>  <span class="hljs-attribute">width</span>: <span class="hljs-built_in">min</span>(<span class="hljs-number">430px</span>, <span class="hljs-built_in">calc</span>(<span class="hljs-number">100vw</span> - <span class="hljs-number">38px</span>));<br>  <span class="hljs-attribute">box-sizing</span>: border-box;<br>  <span class="hljs-attribute">margin</span>: <span class="hljs-number">18px</span> auto <span class="hljs-number">12px</span>;<br>  <span class="hljs-attribute">padding</span>: <span class="hljs-number">13px</span> <span class="hljs-number">17px</span> <span class="hljs-number">12px</span>;<br>  <span class="hljs-attribute">border</span>: <span class="hljs-number">1px</span> solid <span class="hljs-built_in">rgba</span>(<span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0.22</span>);<br>  <span class="hljs-attribute">border-radius</span>: <span class="hljs-number">18px</span>;<br>  <span class="hljs-attribute">background</span>:<br>    <span class="hljs-built_in">linear-gradient</span>(<span class="hljs-number">135deg</span>, <span class="hljs-built_in">rgba</span>(<span class="hljs-number">20</span>, <span class="hljs-number">42</span>, <span class="hljs-number">75</span>, <span class="hljs-number">0.34</span>), <span class="hljs-built_in">rgba</span>(<span class="hljs-number">34</span>, <span class="hljs-number">71</span>, <span class="hljs-number">118</span>, <span class="hljs-number">0.18</span>));<br>  <span class="hljs-attribute">box-shadow</span>:<br>    <span class="hljs-number">0</span> <span class="hljs-number">12px</span> <span class="hljs-number">34px</span> <span class="hljs-built_in">rgba</span>(<span class="hljs-number">5</span>, <span class="hljs-number">20</span>, <span class="hljs-number">46</span>, <span class="hljs-number">0.22</span>),<br>    inset <span class="hljs-number">0</span> <span class="hljs-number">1px</span> <span class="hljs-number">0</span> <span class="hljs-built_in">rgba</span>(<span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0.12</span>);<br>  <span class="hljs-attribute">color</span>: <span class="hljs-built_in">rgba</span>(<span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0.9</span>);<br>  <span class="hljs-attribute">text-align</span>: left;<br>  <span class="hljs-attribute">text-shadow</span>: <span class="hljs-number">0</span> <span class="hljs-number">1px</span> <span class="hljs-number">8px</span> <span class="hljs-built_in">rgba</span>(<span class="hljs-number">0</span>, <span class="hljs-number">19</span>, <span class="hljs-number">48</span>, <span class="hljs-number">0.32</span>);<br>  <span class="hljs-attribute">backdrop-filter</span>: <span class="hljs-built_in">blur</span>(<span class="hljs-number">13px</span>) <span class="hljs-built_in">saturate</span>(<span class="hljs-number">125%</span>);<br>  -webkit-<span class="hljs-attribute">backdrop-filter</span>: <span class="hljs-built_in">blur</span>(<span class="hljs-number">13px</span>) <span class="hljs-built_in">saturate</span>(<span class="hljs-number">125%</span>);<br>&#125;<br><br><span class="hljs-selector-class">.hm-time-row</span> &#123;<br>  <span class="hljs-attribute">display</span>: flex;<br>  <span class="hljs-attribute">align-items</span>: center;<br>  <span class="hljs-attribute">justify-content</span>: center;<br>  <span class="hljs-attribute">gap</span>: <span class="hljs-number">9px</span>;<br>&#125;<br><br><span class="hljs-selector-class">.hm-period-icon</span> &#123;<br>  <span class="hljs-attribute">display</span>: inline-grid;<br>  <span class="hljs-attribute">width</span>: <span class="hljs-number">28px</span>;<br>  <span class="hljs-attribute">height</span>: <span class="hljs-number">28px</span>;<br>  <span class="hljs-attribute">place-items</span>: center;<br>  <span class="hljs-attribute">font-size</span>: <span class="hljs-number">20px</span>;<br>  <span class="hljs-attribute">filter</span>: <span class="hljs-built_in">drop-shadow</span>(<span class="hljs-number">0</span> <span class="hljs-number">2px</span> <span class="hljs-number">6px</span> <span class="hljs-built_in">rgba</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0.22</span>));<br>&#125;<br><br><span class="hljs-selector-class">.hm-clock</span> &#123;<br>  <span class="hljs-attribute">color</span>: <span class="hljs-number">#fff</span>;<br>  <span class="hljs-attribute">font-family</span>:<br>    <span class="hljs-string">&quot;SFMono-Regular&quot;</span>,<br>    <span class="hljs-string">&quot;Cascadia Code&quot;</span>,<br>    <span class="hljs-string">&quot;Roboto Mono&quot;</span>,<br>    Consolas,<br>    monospace;<br>  <span class="hljs-attribute">font-size</span>: <span class="hljs-built_in">clamp</span>(<span class="hljs-number">25px</span>, <span class="hljs-number">4vw</span>, <span class="hljs-number">34px</span>);<br>  <span class="hljs-attribute">font-weight</span>: <span class="hljs-number">650</span>;<br>  <span class="hljs-attribute">font-variant-numeric</span>: tabular-nums;<br>  <span class="hljs-attribute">letter-spacing</span>: <span class="hljs-number">0.06em</span>;<br>  <span class="hljs-attribute">line-height</span>: <span class="hljs-number">1.1</span>;<br>&#125;<br><br><span class="hljs-selector-class">.hm-context-row</span> &#123;<br>  <span class="hljs-attribute">display</span>: flex;<br>  <span class="hljs-attribute">min-width</span>: <span class="hljs-number">0</span>;<br>  <span class="hljs-attribute">align-items</span>: center;<br>  <span class="hljs-attribute">justify-content</span>: center;<br>  <span class="hljs-attribute">gap</span>: <span class="hljs-number">9px</span>;<br>  <span class="hljs-attribute">margin-top</span>: <span class="hljs-number">7px</span>;<br>  <span class="hljs-attribute">color</span>: <span class="hljs-built_in">rgba</span>(<span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0.78</span>);<br>  <span class="hljs-attribute">font-size</span>: <span class="hljs-number">12px</span>;<br>&#125;<br><br><span class="hljs-selector-class">.hm-divider</span> &#123;<br>  <span class="hljs-attribute">width</span>: <span class="hljs-number">3px</span>;<br>  <span class="hljs-attribute">height</span>: <span class="hljs-number">3px</span>;<br>  <span class="hljs-attribute">flex</span>: <span class="hljs-number">0</span> <span class="hljs-number">0</span> <span class="hljs-number">3px</span>;<br>  <span class="hljs-attribute">border-radius</span>: <span class="hljs-number">50%</span>;<br>  <span class="hljs-attribute">background</span>: <span class="hljs-built_in">var</span>(--hm-accent);<br>  <span class="hljs-attribute">box-shadow</span>: <span class="hljs-number">0</span> <span class="hljs-number">0</span> <span class="hljs-number">9px</span> <span class="hljs-built_in">var</span>(--hm-accent);<br>&#125;<br><br><span class="hljs-selector-class">.hm-progress-row</span> &#123;<br>  <span class="hljs-attribute">display</span>: grid;<br>  <span class="hljs-attribute">grid-template-columns</span>: auto <span class="hljs-built_in">minmax</span>(<span class="hljs-number">70px</span>, <span class="hljs-number">1</span>fr) <span class="hljs-number">38px</span>;<br>  <span class="hljs-attribute">align-items</span>: center;<br>  <span class="hljs-attribute">gap</span>: <span class="hljs-number">9px</span>;<br>  <span class="hljs-attribute">margin-top</span>: <span class="hljs-number">10px</span>;<br>  <span class="hljs-attribute">color</span>: <span class="hljs-built_in">rgba</span>(<span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0.68</span>);<br>  <span class="hljs-attribute">font-size</span>: <span class="hljs-number">10px</span>;<br>&#125;<br><br><span class="hljs-selector-class">.hm-progress-track</span> &#123;<br>  <span class="hljs-attribute">height</span>: <span class="hljs-number">4px</span>;<br>  <span class="hljs-attribute">overflow</span>: hidden;<br>  <span class="hljs-attribute">border-radius</span>: <span class="hljs-number">999px</span>;<br>  <span class="hljs-attribute">background</span>: <span class="hljs-built_in">rgba</span>(<span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0.16</span>);<br>&#125;<br><br><span class="hljs-selector-class">.hm-progress-fill</span> &#123;<br>  <span class="hljs-attribute">display</span>: block;<br>  <span class="hljs-attribute">width</span>: <span class="hljs-number">0</span>;<br>  <span class="hljs-attribute">height</span>: <span class="hljs-number">100%</span>;<br>  <span class="hljs-attribute">border-radius</span>: inherit;<br>  <span class="hljs-attribute">background</span>: <span class="hljs-built_in">linear-gradient</span>(<span class="hljs-number">90deg</span>, <span class="hljs-number">#63c9ff</span>, <span class="hljs-number">#c8efff</span>);<br>  <span class="hljs-attribute">box-shadow</span>: <span class="hljs-number">0</span> <span class="hljs-number">0</span> <span class="hljs-number">9px</span> <span class="hljs-built_in">rgba</span>(<span class="hljs-number">99</span>, <span class="hljs-number">201</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0.7</span>);<br>  <span class="hljs-attribute">transition</span>: width <span class="hljs-number">0.4s</span> ease;<br>&#125;<br><br><span class="hljs-selector-class">.hm-progress-value</span> &#123;<br>  <span class="hljs-attribute">font-variant-numeric</span>: tabular-nums;<br>  <span class="hljs-attribute">text-align</span>: right;<br>&#125;<br><br><span class="hljs-selector-id">#header-moment</span><span class="hljs-selector-attr">[data-period=<span class="hljs-string">&#x27;evening&#x27;</span>]</span>,<br><span class="hljs-selector-id">#header-moment</span><span class="hljs-selector-attr">[data-period=<span class="hljs-string">&#x27;night&#x27;</span>]</span> &#123;<br>  <span class="hljs-attr">--hm-accent</span>: <span class="hljs-number">#b9b7ff</span>;<br>  <span class="hljs-attribute">background</span>:<br>    <span class="hljs-built_in">linear-gradient</span>(<span class="hljs-number">135deg</span>, <span class="hljs-built_in">rgba</span>(<span class="hljs-number">17</span>, <span class="hljs-number">24</span>, <span class="hljs-number">58</span>, <span class="hljs-number">0.48</span>), <span class="hljs-built_in">rgba</span>(<span class="hljs-number">48</span>, <span class="hljs-number">43</span>, <span class="hljs-number">91</span>, <span class="hljs-number">0.25</span>));<br>&#125;<br><br><span class="hljs-selector-id">#header-moment</span><span class="hljs-selector-attr">[data-period=<span class="hljs-string">&#x27;evening&#x27;</span>]</span> <span class="hljs-selector-class">.hm-progress-fill</span>,<br><span class="hljs-selector-id">#header-moment</span><span class="hljs-selector-attr">[data-period=<span class="hljs-string">&#x27;night&#x27;</span>]</span> <span class="hljs-selector-class">.hm-progress-fill</span> &#123;<br>  <span class="hljs-attribute">background</span>: <span class="hljs-built_in">linear-gradient</span>(<span class="hljs-number">90deg</span>, <span class="hljs-number">#8da8ff</span>, <span class="hljs-number">#d8ccff</span>);<br>  <span class="hljs-attribute">box-shadow</span>: <span class="hljs-number">0</span> <span class="hljs-number">0</span> <span class="hljs-number">9px</span> <span class="hljs-built_in">rgba</span>(<span class="hljs-number">157</span>, <span class="hljs-number">165</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0.68</span>);<br>&#125;<br><br><span class="hljs-keyword">@media</span> (<span class="hljs-attribute">max-width</span>: <span class="hljs-number">600px</span>) &#123;<br>  <span class="hljs-selector-id">#header-moment</span> &#123;<br>    <span class="hljs-attribute">width</span>: <span class="hljs-built_in">min</span>(<span class="hljs-number">360px</span>, <span class="hljs-built_in">calc</span>(<span class="hljs-number">100vw</span> - <span class="hljs-number">30px</span>));<br>    <span class="hljs-attribute">margin-top</span>: <span class="hljs-number">14px</span>;<br>    <span class="hljs-attribute">padding</span>: <span class="hljs-number">11px</span> <span class="hljs-number">14px</span> <span class="hljs-number">10px</span>;<br>    <span class="hljs-attribute">border-radius</span>: <span class="hljs-number">16px</span>;<br>  &#125;<br><br>  <span class="hljs-selector-class">.hm-context-row</span> &#123;<br>    <span class="hljs-attribute">gap</span>: <span class="hljs-number">7px</span>;<br>    <span class="hljs-attribute">font-size</span>: <span class="hljs-number">11px</span>;<br>  &#125;<br><br>  <span class="hljs-selector-class">.hm-greeting</span> &#123;<br>    <span class="hljs-attribute">overflow</span>: hidden;<br>    <span class="hljs-attribute">white-space</span>: nowrap;<br>    <span class="hljs-attribute">text-overflow</span>: ellipsis;<br>  &#125;<br>&#125;<br><br><span class="hljs-keyword">@media</span> (<span class="hljs-attribute">prefers-reduced-motion</span>: reduce) &#123;<br>  <span class="hljs-selector-class">.hm-progress-fill</span> &#123;<br>    <span class="hljs-attribute">transition</span>: none;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<hr>
+<h2 id="五、部署到-Hexo-Butterfly">五、部署到 Hexo + Butterfly</h2>
+<h3 id="1-放置文件">1. 放置文件</h3>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs text">你的博客/<br>└── source/<br>    ├── css/<br>    │   └── clock.css<br>    └── js/<br>        └── clock.js<br></code></pre></td></tr></table></figure>
+<h3 id="2-注入主题">2. 注入主题</h3>
+<p>在 <code>_config.butterfly.yml</code> 中加入：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">inject:</span><br>  <span class="hljs-attr">head:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-string">&lt;link</span> <span class="hljs-string">rel=&quot;stylesheet&quot;</span> <span class="hljs-string">href=&quot;/css/clock.css&quot;&gt;</span><br>  <span class="hljs-attr">bottom:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-string">&lt;script</span> <span class="hljs-string">defer</span> <span class="hljs-string">src=&quot;/js/clock.js&quot;&gt;&lt;/script&gt;</span><br></code></pre></td></tr></table></figure>
+<p>修改后运行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">npm run clean<br>npm run build<br>npm run server<br></code></pre></td></tr></table></figure>
+<p>Butterfly 首页中存在 <code>#site-info</code>，脚本会把组件插入社交图标之前，不需要修改主题模板。</p>
+<h3 id="3-停用组件">3. 停用组件</h3>
+<p>不需要删除源码，只需注释两条注入配置：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-comment"># - &lt;link rel=&quot;stylesheet&quot; href=&quot;/css/clock.css&quot;&gt;</span><br><span class="hljs-comment"># - &lt;script defer src=&quot;/js/clock.js&quot;&gt;&lt;/script&gt;</span><br></code></pre></td></tr></table></figure>
+<p>这也是本站当前采用的停用方式。</p>
+<hr>
+<h2 id="六、部署到普通-HTML-页面">六、部署到普通 HTML 页面</h2>
+<p>在 HTML 中准备挂载区域并引入资源：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;stylesheet&quot;</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;/assets/clock.css&quot;</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">header</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;site-info&quot;</span>&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>我的网站<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;site_social_icons&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span><br>  <span class="hljs-tag">&lt;/<span class="hljs-name">header</span>&gt;</span><br><br>  <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">defer</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;/assets/clock.js&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<p>如果网站没有 <code>#site-info</code>，可以修改 JavaScript：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-keyword">var</span> siteInfo = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">&#x27;.你自己的页首选择器&#x27;</span>);<br></code></pre></td></tr></table></figure>
+<p>因此它可以迁移到 Hugo、MkDocs、WordPress、Vue 或 React。对于 Vue/React，更推荐将内部 HTML 改写成框架组件，并在最外层布局中挂载。</p>
+<hr>
+<h2 id="七、PJAX-为什么需要额外处理">七、PJAX 为什么需要额外处理</h2>
+<p>Butterfly 开启 PJAX 后，站内跳转不一定重新加载全部 JavaScript。代码监听：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-variable language_">document</span>.<span class="hljs-title function_">addEventListener</span>(<span class="hljs-string">&#x27;pjax:complete&#x27;</span>, startMoment);<br></code></pre></td></tr></table></figure>
+<p>每次切换完成后，它会重新寻找 <code>#site-info</code>。同时通过 <code>#header-moment</code> 判断组件是否已经存在，避免重复插入多个时钟。</p>
+<p>页面从后台恢复时也会立即校准：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-variable language_">document</span>.<span class="hljs-title function_">addEventListener</span>(<span class="hljs-string">&#x27;visibilitychange&#x27;</span>, <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;<br>  <span class="hljs-keyword">if</span> (!<span class="hljs-variable language_">document</span>.<span class="hljs-property">hidden</span>) <span class="hljs-title function_">updateMoment</span>();<br>&#125;);<br></code></pre></td></tr></table></figure>
+<hr>
+<h2 id="八、调整组件位置">八、调整组件位置</h2>
+<p>当前代码把组件插在社交图标之前：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs javascript">siteInfo.<span class="hljs-title function_">insertBefore</span>(root, socialIcons);<br></code></pre></td></tr></table></figure>
+<p>如果觉得页首太显眼，可以考虑：</p>
+<ul>
+<li>放到侧栏作者信息下方</li>
+<li>缩小为导航栏右侧的一行时间</li>
+<li>放入页脚，与网站运行时间并列</li>
+<li>只显示时间，隐藏问候与今日进度</li>
+<li>桌面端显示完整组件，移动端只显示日期和时间</li>
+</ul>
+<p>例如放到页脚：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-keyword">var</span> siteInfo = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;footer&#x27;</span>);<br></code></pre></td></tr></table></figure>
+<p>更换挂载位置时，CSS 中的宽度、背景透明度和字体大小也应一同调整。</p>
+<hr>
+<h2 id="九、常见问题">九、常见问题</h2>
+<h3 id="1-页面没有显示组件">1. 页面没有显示组件</h3>
+<p>检查：</p>
+<ul>
+<li>CSS 和 JS 是否已经生成到 <code>public/</code></li>
+<li><code>_config.butterfly.yml</code> 的 YAML 缩进是否正确</li>
+<li>页面是否存在 <code>#site-info</code></li>
+<li>浏览器是否仍在使用旧缓存</li>
+</ul>
+<p>修改资源后可以增加版本号：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-bullet">-</span> <span class="hljs-string">&lt;link</span> <span class="hljs-string">rel=&quot;stylesheet&quot;</span> <span class="hljs-string">href=&quot;/css/clock.css?v=2&quot;&gt;</span><br><span class="hljs-bullet">-</span> <span class="hljs-string">&lt;script</span> <span class="hljs-string">defer</span> <span class="hljs-string">src=&quot;/js/clock.js?v=2&quot;&gt;&lt;/script&gt;</span><br></code></pre></td></tr></table></figure>
+<h3 id="2-切换页面后出现两个组件">2. 切换页面后出现两个组件</h3>
+<p>确保创建前检查：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;header-moment&#x27;</span>);<br></code></pre></td></tr></table></figure>
+<p>并避免在多个配置文件中重复注入脚本。</p>
+<h3 id="3-时间与北京时间不一致">3. 时间与北京时间不一致</h3>
+<p>当前组件显示访客设备时间，而不是固定北京时间。如果希望始终显示中国时区，可以使用：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-keyword">new</span> <span class="hljs-title class_">Intl</span>.<span class="hljs-title class_">DateTimeFormat</span>(<span class="hljs-string">&#x27;zh-CN&#x27;</span>, &#123;<br>  <span class="hljs-attr">timeZone</span>: <span class="hljs-string">&#x27;Asia/Shanghai&#x27;</span><br>&#125;);<br></code></pre></td></tr></table></figure>
+<h3 id="4-为什么不直接使用服务器时间">4. 为什么不直接使用服务器时间</h3>
+<p>时钟每秒都需要更新。通过浏览器本地计算可以避免持续请求服务器，也不需要后端程序。对于装饰性博客时钟，这通常已经足够。</p>
+<hr>
+<h2 id="十、隐私与性能">十、隐私与性能</h2>
+<p>当前组件：</p>
+<ul>
+<li>不读取地理位置</li>
+<li>不写入 Cookie 或本地存储</li>
+<li>不请求第三方接口</li>
+<li>不上传访客时间信息</li>
+<li>只保留一个每秒触发的计时器</li>
+</ul>
+<p>当标签页重新可见时会主动校准时间，避免浏览器后台节流造成显示滞后。</p>
+<hr>
+<h2 id="结语">结语</h2>
+<p>一个博客时钟真正需要处理的并不只是每秒修改文字，还包括挂载位置、移动端空间、PJAX 生命周期、后台标签页校准和访客隐私。</p>
+<p>如果只是想让网站多一点与访问时刻有关的氛围，本地时间、时段问候和今日进度已经足够。天气、节气、日出日落等信息可以在确认位置与视觉层级后，再作为独立模块逐步加入。</p>
+<hr>
+<h2 id="AI-内容声明">AI 内容声明</h2>
+<p>本文包含 AI 辅助生成内容。文章结构、部分文字表述与组件代码由 AI 协助完成，并经过作者审阅、修改和本地构建验证。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://blog.unmyic.com/">unmyic</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://blog.unmyic.com/2026/07/28/header-moment-clock-guide/">https://blog.unmyic.com/2026/07/28/header-moment-clock-guide/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://blog.unmyic.com" target="_blank">unmyic</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Hexo/">Hexo</a><a class="post-meta__tags" href="/tags/JavaScript/">JavaScript</a><a class="post-meta__tags" href="/tags/CSS/">CSS</a><a class="post-meta__tags" href="/tags/%E5%8D%9A%E5%AE%A2%E7%BB%84%E4%BB%B6/">博客组件</a></div><div class="post-share"><div class="social-share" data-image="/img/post-covers/pixiv5.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/07/27/custom-music-player-guide/" title="如何实现一个全站悬浮音乐播放器：Hexo 部署、PJAX 持久化与源码分享"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/pixiv1.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">如何实现一个全站悬浮音乐播放器：Hexo 部署、PJAX 持久化与源码分享</div></div><div class="info-2"><div class="info-item-1">分享本站左下角悬浮音乐播放器的完整实现，介绍网易云歌单接入、播放模式、音量控制、30 秒试听曲目跳过、PJAX 全站持久化，以及 Hexo、普通网页和其他框架中的部署方式。</div></div></div></a><a class="pagination-related" href="/2026/07/28/hexo-category-tiles-guide/" title="为 Hexo 分类页添加全息磁贴：3D 倾斜、动态反光与明暗主题"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/6.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">为 Hexo 分类页添加全息磁贴：3D 倾斜、动态反光与明暗主题</div></div><div class="info-2"><div class="info-item-1">将 Butterfly 默认的分类文字列表增强为全息收藏卡式磁贴，加入分类统计、主题色、3D 倾斜、指针反光、暗色适配、移动端降级与 PJAX 支持，并提供可交互预览和完整源码。</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/07/28/hexo-category-tiles-guide/" title="为 Hexo 分类页添加全息磁贴：3D 倾斜、动态反光与明暗主题"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/6.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="fas fa-history fa-fw"></i> 2026-07-28</div><div class="info-item-2">为 Hexo 分类页添加全息磁贴：3D 倾斜、动态反光与明暗主题</div></div><div class="info-2"><div class="info-item-1">将 Butterfly 默认的分类文字列表增强为全息收藏卡式磁贴，加入分类统计、主题色、3D 倾斜、指针反光、暗色适配、移动端降级与 PJAX 支持，并提供可交互预览和完整源码。</div></div></div></a><a class="pagination-related" href="/2026/07/27/custom-music-player-guide/" title="如何实现一个全站悬浮音乐播放器：Hexo 部署、PJAX 持久化与源码分享"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/pixiv1.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="fas fa-history fa-fw"></i> 2026-07-28</div><div class="info-item-2">如何实现一个全站悬浮音乐播放器：Hexo 部署、PJAX 持久化与源码分享</div></div><div class="info-2"><div class="info-item-1">分享本站左下角悬浮音乐播放器的完整实现，介绍网易云歌单接入、播放模式、音量控制、30 秒试听曲目跳过、PJAX 全站持久化，以及 Hexo、普通网页和其他框架中的部署方式。</div></div></div></a><a class="pagination-related" href="/2026/07/30/hexo-butterfly-series/" title="Hexo + Butterfly 个性化博客搭建指南"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/pixiv2.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="fas fa-history fa-fw"></i> 2026-07-30</div><div class="info-item-2">Hexo + Butterfly 个性化博客搭建指南</div></div><div class="info-2"><div class="info-item-1">从零安装 Hexo 与 Butterfly，逐步完成基础配置、页面美化、自定义组件和主题分离。全系列共六篇，既适合第一次搭建博客，也适合希望长期维护和形成独立设计的使用者。</div></div></div></a><a class="pagination-related" href="/2026/07/26/markdown-html-guide/" title="Markdown 与 HTML：从基础语法到博客美化"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/9.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="fas fa-history fa-fw"></i> 2026-07-28</div><div class="info-item-2">Markdown 与 HTML：从基础语法到博客美化</div></div><div class="info-2"><div class="info-item-1">系统梳理 Markdown 的常用语法、它们生成的 HTML 结构，以及 Markdown 不便表达时如何使用 HTML 与 CSS，为 Hexo 博客加入提示卡片、折叠内容、按钮、进度条和响应式布局。</div></div></div></a><a class="pagination-related" href="/2025/08/20/Node-js%E4%BB%8B%E7%BB%8D/" title="Node.js介绍"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/node.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="fas fa-history fa-fw"></i> 2026-07-24</div><div class="info-item-2">Node.js介绍</div></div><div class="info-2"><div class="info-item-1">在搭建Hexo博客时，每个教程的第一步都会让你安装环境依赖，而第一个安装的便是Node.js，那么到底什么是Node.js，它在我们的Blog搭建中起了什么作用？实际上，Node.js是一个开源且跨平台的JavaScript运行环境，有了Node，Hexo才能运行、装插件、生成网站。</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="gitalk-container"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">unmyic</div><div class="author-info-description">谁终将声震人间，必长久深自缄默</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">9</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">25</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/unmyic"><i class="fab fa-github"></i><span>访问 GitHub</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/unmyic" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="/img/QR/wechat.jpg" target="_blank" title="微信二维码"><i class="fa-brands fa-weixin" style="color: #07c160;"></i></a><a class="social-icon" href="https://space.bilibili.com/3494367889197271" target="_blank" title="哔哩哔哩"><i class="fa-brands fa-bilibili" style="color: #00a1d6;"></i></a><a class="social-icon" href="mailto:unmyic@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">网站还在持续建设中</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E7%BB%84%E4%BB%B6%E7%9A%84%E8%AE%BE%E8%AE%A1%E6%80%9D%E8%B7%AF"><span class="toc-number">2.</span> <span class="toc-text">一、组件的设计思路</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E4%B8%8D%E4%BE%9D%E8%B5%96%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%97%B6%E9%97%B4"><span class="toc-number">2.1.</span> <span class="toc-text">1. 不依赖服务器时间</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E6%A0%B9%E6%8D%AE%E6%97%B6%E6%AE%B5%E6%94%B9%E5%8F%98%E9%97%AE%E5%80%99"><span class="toc-number">2.2.</span> <span class="toc-text">2. 根据时段改变问候</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E8%AE%A1%E7%AE%97%E4%BB%8A%E6%97%A5%E8%BF%9B%E5%BA%A6"><span class="toc-number">2.3.</span> <span class="toc-text">3. 计算今日进度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E4%B8%BA%E4%BB%80%E4%B9%88%E6%9A%82%E6%97%B6%E4%B8%8D%E5%8A%A0%E5%85%A5%E5%A4%A9%E6%B0%94"><span class="toc-number">2.4.</span> <span class="toc-text">4. 为什么暂时不加入天气</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E6%BA%90%E7%A0%81%E4%B8%8B%E8%BD%BD"><span class="toc-number">3.</span> <span class="toc-text">二、源码下载</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%AE%8C%E6%95%B4-JavaScript"><span class="toc-number">4.</span> <span class="toc-text">三、完整 JavaScript</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E5%AE%8C%E6%95%B4-CSS"><span class="toc-number">5.</span> <span class="toc-text">四、完整 CSS</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E9%83%A8%E7%BD%B2%E5%88%B0-Hexo-Butterfly"><span class="toc-number">6.</span> <span class="toc-text">五、部署到 Hexo + Butterfly</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%94%BE%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="toc-number">6.1.</span> <span class="toc-text">1. 放置文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E6%B3%A8%E5%85%A5%E4%B8%BB%E9%A2%98"><span class="toc-number">6.2.</span> <span class="toc-text">2. 注入主题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%81%9C%E7%94%A8%E7%BB%84%E4%BB%B6"><span class="toc-number">6.3.</span> <span class="toc-text">3. 停用组件</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E9%83%A8%E7%BD%B2%E5%88%B0%E6%99%AE%E9%80%9A-HTML-%E9%A1%B5%E9%9D%A2"><span class="toc-number">7.</span> <span class="toc-text">六、部署到普通 HTML 页面</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81PJAX-%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E9%A2%9D%E5%A4%96%E5%A4%84%E7%90%86"><span class="toc-number">8.</span> <span class="toc-text">七、PJAX 为什么需要额外处理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E8%B0%83%E6%95%B4%E7%BB%84%E4%BB%B6%E4%BD%8D%E7%BD%AE"><span class="toc-number">9.</span> <span class="toc-text">八、调整组件位置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%9D%E3%80%81%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98"><span class="toc-number">10.</span> <span class="toc-text">九、常见问题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E9%A1%B5%E9%9D%A2%E6%B2%A1%E6%9C%89%E6%98%BE%E7%A4%BA%E7%BB%84%E4%BB%B6"><span class="toc-number">10.1.</span> <span class="toc-text">1. 页面没有显示组件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%88%87%E6%8D%A2%E9%A1%B5%E9%9D%A2%E5%90%8E%E5%87%BA%E7%8E%B0%E4%B8%A4%E4%B8%AA%E7%BB%84%E4%BB%B6"><span class="toc-number">10.2.</span> <span class="toc-text">2. 切换页面后出现两个组件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E6%97%B6%E9%97%B4%E4%B8%8E%E5%8C%97%E4%BA%AC%E6%97%B6%E9%97%B4%E4%B8%8D%E4%B8%80%E8%87%B4"><span class="toc-number">10.3.</span> <span class="toc-text">3. 时间与北京时间不一致</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E7%9B%B4%E6%8E%A5%E4%BD%BF%E7%94%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%97%B6%E9%97%B4"><span class="toc-number">10.4.</span> <span class="toc-text">4. 为什么不直接使用服务器时间</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E3%80%81%E9%9A%90%E7%A7%81%E4%B8%8E%E6%80%A7%E8%83%BD"><span class="toc-number">11.</span> <span class="toc-text">十、隐私与性能</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%93%E8%AF%AD"><span class="toc-number">12.</span> <span class="toc-text">结语</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AI-%E5%86%85%E5%AE%B9%E5%A3%B0%E6%98%8E"><span class="toc-number">13.</span> <span class="toc-text">AI 内容声明</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/07/30/hexo-butterfly-series/" title="Hexo + Butterfly 个性化博客搭建指南"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/pixiv2.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hexo + Butterfly 个性化博客搭建指南"/></a><div class="content"><a class="title" href="/2026/07/30/hexo-butterfly-series/" title="Hexo + Butterfly 个性化博客搭建指南">Hexo + Butterfly 个性化博客搭建指南</a><time datetime="2026-07-30T13:29:00.000Z" title="发表于 2026-07-30 21:29:00">2026-07-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/07/30/game-key-shield-introduction/" title="GameKeyShield：让游戏快捷键与全局热键不再冲突"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/project-covers/game-key-shield.svg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="GameKeyShield：让游戏快捷键与全局热键不再冲突"/></a><div class="content"><a class="title" href="/2026/07/30/game-key-shield-introduction/" title="GameKeyShield：让游戏快捷键与全局热键不再冲突">GameKeyShield：让游戏快捷键与全局热键不再冲突</a><time datetime="2026-07-30T02:15:46.000Z" title="发表于 2026-07-30 10:15:46">2026-07-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/07/29/tray-audio-bridge-introduction/" title="Tray Audio Bridge：把手机声音无线传到 Windows 电脑"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/tray-audio-bridge.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Tray Audio Bridge：把手机声音无线传到 Windows 电脑"/></a><div class="content"><a class="title" href="/2026/07/29/tray-audio-bridge-introduction/" title="Tray Audio Bridge：把手机声音无线传到 Windows 电脑">Tray Audio Bridge：把手机声音无线传到 Windows 电脑</a><time datetime="2026-07-29T08:37:26.000Z" title="发表于 2026-07-29 16:37:26">2026-07-29</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/07/28/hexo-category-tiles-guide/" title="为 Hexo 分类页添加全息磁贴：3D 倾斜、动态反光与明暗主题"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/6.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="为 Hexo 分类页添加全息磁贴：3D 倾斜、动态反光与明暗主题"/></a><div class="content"><a class="title" href="/2026/07/28/hexo-category-tiles-guide/" title="为 Hexo 分类页添加全息磁贴：3D 倾斜、动态反光与明暗主题">为 Hexo 分类页添加全息磁贴：3D 倾斜、动态反光与明暗主题</a><time datetime="2026-07-28T11:38:12.000Z" title="发表于 2026-07-28 19:38:12">2026-07-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/07/28/header-moment-clock-guide/" title="为博客添加一个页首时光状态组件：实时时钟、问候与今日进度"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/post-covers/pixiv5.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="为博客添加一个页首时光状态组件：实时时钟、问候与今日进度"/></a><div class="content"><a class="title" href="/2026/07/28/header-moment-clock-guide/" title="为博客添加一个页首时光状态组件：实时时钟、问候与今日进度">为博客添加一个页首时光状态组件：实时时钟、问候与今日进度</a><time datetime="2026-07-28T08:44:38.000Z" title="发表于 2026-07-28 16:44:38">2026-07-28</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url(/img/banner-ocean-v2-2k.webp);"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By unmyic</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><div class="js-pjax"><script>(() => {
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = `%%{init:{ 'theme':'${theme}'}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (true) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const applyThemeDefaultsConfig = theme => {
+    if (theme === 'dark-mode') {
+      Chart.defaults.color = "rgba(255, 255, 255, 0.8)"
+      Chart.defaults.borderColor = "rgba(255, 255, 255, 0.2)"
+      Chart.defaults.scale.ticks.backdropColor = "transparent"
+    } else {
+      Chart.defaults.color = "rgba(0, 0, 0, 0.8)"
+      Chart.defaults.borderColor = "rgba(0, 0, 0, 0.1)"
+      Chart.defaults.scale.ticks.backdropColor = "transparent"
+    }
+  }
+
+  // Recursively traverse the config object and automatically apply theme-specific color schemes
+  const applyThemeConfig = (obj, theme) => {
+    if (typeof obj !== 'object' || obj === null) return
+
+    Object.keys(obj).forEach(key => {
+      const value = obj[key]
+      // If the property is an object and has theme-specific options, apply them
+      if (typeof value === 'object' && value !== null) {
+        if (value[theme]) {
+          obj[key] = value[theme] // Apply the value for the current theme
+        } else {
+          // Recursively process child objects
+          applyThemeConfig(value, theme)
+        }
+      }
+    })
+  }
+
+  const runChartJS = ele => {
+    window.loadChartJS = true
+
+    Array.from(ele).forEach((item, index) => {
+      const chartSrc = item.firstElementChild
+      const chartID = item.getAttribute('data-chartjs-id') || ('chartjs-' + index) // Use custom ID or default ID
+      const width = item.getAttribute('data-width')
+      const existingCanvas = document.getElementById(chartID)
+
+      // If a canvas already exists, remove it to avoid rendering duplicates
+      if (existingCanvas) {
+          existingCanvas.parentNode.remove()
+      }
+
+      const chartDefinition = chartSrc.textContent
+      const canvas = document.createElement('canvas')
+      canvas.id = chartID
+
+      const div = document.createElement('div')
+      div.className = 'chartjs-wrap'
+
+      if (width) {
+        div.style.width = width
+      }
+
+      div.appendChild(canvas)
+      chartSrc.insertAdjacentElement('afterend', div)
+
+      const ctx = document.getElementById(chartID).getContext('2d')
+
+      const config = JSON.parse(chartDefinition)
+
+      const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark-mode' : 'light-mode'
+
+      // Set default styles (initial setup)
+      applyThemeDefaultsConfig(theme)
+
+      // Automatically traverse the config and apply dual-mode color schemes
+      applyThemeConfig(config, theme)
+
+      new Chart(ctx, config)
+    })
+  }
+
+  const loadChartJS = () => {
+    const chartJSEle = document.querySelectorAll('#article-container .chartjs-container')
+    if (chartJSEle.length === 0) return
+
+    window.loadChartJS ? runChartJS(chartJSEle) : btf.getScript('https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js').then(() => runChartJS(chartJSEle))
+  }
+
+  // Listen for theme change events
+  btf.addGlobalFn('themeChange', loadChartJS, 'chartjs')
+  btf.addGlobalFn('encrypt', loadChartJS, 'chartjs')
+
+  window.pjax ? loadChartJS() : document.addEventListener('DOMContentLoaded', loadChartJS)
+})()</script><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const commentCount = n => {
+    const isCommentCount = document.querySelector('#post-meta .gitalk-comment-count')
+    if (isCommentCount) {
+      isCommentCount.textContent= n
+    }
+  }
+
+  const initGitalk = (el, path) => {
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGitalk = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+
+    const gitalk = new Gitalk({
+      clientID: 'Ov23liXzl5qiyvMfep1Q',
+      clientSecret: '517baaa10eea2a0b26f6e424a5a84c22db5b865f',
+      repo: 'unmyic.github.io',
+      owner: 'unmyic',
+      admin: ['unmyic'],
+      updateCountCallback: commentCount,
+      ...option,
+      id: isShuoshuo ? path : (option && option.id) || '5e132ee4a1a59106d1448ffb3f20d592'
+    })
+
+    gitalk.render('gitalk-container')
+  }
+
+  const loadGitalk = async(el, path) => {
+    if (typeof Gitalk === 'function') initGitalk(el, path)
+    else {
+      await btf.getCSS('https://cdn.jsdelivr.net/npm/gitalk/dist/gitalk.min.css')
+      await btf.getScript('https://cdn.jsdelivr.net/npm/gitalk/dist/gitalk.min.js')
+      initGitalk(el, path)
+    }
+  }
+
+  if (isShuoshuo) {
+    'Gitalk' === 'Gitalk'
+      ? window.shuoshuoComment = { loadComment: loadGitalk }
+      : window.loadOtherComment = loadGitalk
+    return
+  }
+
+  if ('Gitalk' === 'Gitalk' || !true) {
+    if (true) btf.loadComment(document.getElementById('gitalk-container'), loadGitalk)
+    else loadGitalk()
+  } else {
+    window.loadOtherComment = loadGitalk
+  }
+})()</script></div><script src="/js/custom-footer.js?v=3"></script><script src="/js/runtime.js?v=7"></script><script defer src="/js/hero-scroll.js?v=11"></script><script defer src="/js/post-layout-switcher.js?v=1"></script><script defer src="/js/theme-atmosphere.js?v=1"></script><script defer src="/js/category-tiles.js?v=2"></script><script defer src="/js/friend-tech-cards.js?v=3"></script><script defer src="/js/tag-constellation.js?v=1"></script><script defer src="/js/command-palette.js?v=2"></script><script defer src="/js/summary-tooltip.js?v=1"></script><script defer src="/js/toc-katex.js?v=1"></script><script defer src="/js/music-player.js?v=8"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = false;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/click-heart.min.js" async="async" mobile="false"></script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>(() => {
+  const pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => fn())
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || item.innerHTML || ""
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    if (e.request.status === 404) {
+      const usePjax = true
+      false
+        ? (usePjax ? pjax.loadUrl('/404.html') : window.location.href = '/404.html')
+        : window.location.href = e.request.responseURL
+    }
+  })
+})()</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

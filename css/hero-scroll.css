@@ -1,0 +1,453 @@
+/*
+ * Butterfly 首页背景效果
+ *
+ * 设计思路参考固定 Hero + 透明正文的实现：
+ * 1. 全页只绘制一次 #web_bg，避免首屏与正文重复贴图。
+ * 2. 背景固定在视口，页面滚动时自然形成视差。
+ * 3. 使用覆盖整个视口的统一底色层，透明度随滚动连续变化。
+ * 4. 透明度设有上限，页面底部仍然保留背景图。
+ */
+
+#web_bg {
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+#web_bg.hero-background-active {
+  opacity: 1;
+  background-position: center center !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+  background-attachment: fixed !important;
+}
+
+/*
+ * Dark mode uses a companion image with the same composition.
+ * Keeping the swap on #web_bg makes Butterfly's theme toggle update it
+ * immediately without reloading the page.
+ */
+[data-theme='dark'] #web_bg.hero-background-active {
+  background-image: url('/img/banner-ocean-night-v1.webp') !important;
+}
+
+/*
+ * Butterfly adds a 70% black mask to #web_bg in dark mode. The night artwork
+ * already contains its own directional lighting, so that mask would hide the
+ * whale, the lantern glow, and most of the pier detail.
+ */
+[data-theme='dark'] #web_bg.hero-background-active::before {
+  background-color: transparent !important;
+}
+
+/*
+ * Portrait artwork for phones and small tablets. These are dedicated 9:16
+ * crops, so important subjects stay inside the narrow viewport instead of
+ * being cut off by a desktop cover image.
+ */
+@media (max-width: 900px) and (orientation: portrait) {
+  #web_bg.hero-background-active {
+    background-image: url('/img/banner-ocean-mobile-day-v1.webp') !important;
+    background-position: center center !important;
+    background-attachment: scroll !important;
+  }
+
+  [data-theme='dark'] #web_bg.hero-background-active {
+    background-image: url('/img/banner-ocean-mobile-night-v1.webp') !important;
+  }
+}
+
+/*
+ * The source SVG is black. Choose its visible color from the navigation
+ * context: white over photographic headers, black over the light solid nav,
+ * and white again when the solid nav is in dark mode.
+ */
+#page-header #nav .site-icon {
+  transition: filter 0.25s ease;
+}
+
+#page-header:not(.not-top-img):not(.nav-fixed) #nav .site-icon {
+  filter:
+    brightness(0)
+    invert(1)
+    drop-shadow(0 1px 2px rgba(0, 0, 0, 0.58));
+}
+
+#page-header.not-top-img #nav .site-icon,
+#page-header.nav-fixed #nav .site-icon {
+  filter:
+    brightness(0)
+    drop-shadow(0 1px 1px rgba(255, 255, 255, 0.36));
+}
+
+[data-theme='dark'] #page-header.not-top-img #nav .site-icon,
+[data-theme='dark'] #page-header.nav-fixed #nav .site-icon {
+  filter:
+    brightness(0)
+    invert(1)
+    drop-shadow(0 1px 2px rgba(0, 0, 0, 0.64));
+}
+
+/* 首屏直接透出唯一的全局背景，不再单独绘制同一张图片。 */
+body.hero-reference-effect #page-header.full_page {
+  position: relative;
+  z-index: 1;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+/*
+ * 全站一图流：页首只保留导航、标题等内容，不再单独绘制 Butterfly
+ * 的文章封面或默认横幅。背景从页面顶部到页脚始终只由 #web_bg 绘制。
+ */
+body.one-image-flow #page-header {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+body.one-image-flow #page-header:not(.not-top-img)::before {
+  background-color: transparent !important;
+  opacity: 0 !important;
+}
+
+body.one-image-flow #footer,
+body.one-image-flow #footer::before {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+/*
+ * Butterfly 默认会用 #page-header::before 单独压暗首屏。
+ * 该遮罩在首屏底部突然结束，是截图中水平色彩分层的来源。
+ * 首页关闭它，明暗只交给覆盖整个背景的统一 wash 层处理。
+ */
+body.hero-reference-effect
+  #page-header.full_page:not(.not-top-img)::before {
+  background-color: transparent !important;
+  opacity: 0 !important;
+}
+
+body.hero-reference-effect #page-header.full_page #site-info,
+body.hero-reference-effect #page-header.full_page #scroll-down {
+  will-change: transform, opacity;
+}
+
+/* 单一、均匀的底色层；不存在空间色阶或正文边界。 */
+#web_bg .hero-background-wash {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: var(--global-bg);
+  opacity: var(--hero-wash-opacity, 0);
+  pointer-events: none;
+  will-change: opacity;
+}
+
+/*
+ * Atmospheric motion is intentionally slow and low contrast. It adds life to
+ * the still artwork without competing with the title or making the background
+ * look like a looping video.
+ */
+#web_bg .hero-atmosphere {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+#web_bg .hero-stars {
+  position: absolute;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+/*
+ * 白天只使用透明的局部光线与光晕，不铺设整块色幕，避免重新产生水平分层。
+ */
+#web_bg .hero-day-rays {
+  position: absolute;
+  inset: -18% -12% 18% 28%;
+  opacity: 0.48;
+  background:
+    conic-gradient(
+      from 198deg at 66% 18%,
+      transparent 0deg,
+      rgba(255, 236, 184, 0.17) 8deg,
+      transparent 18deg,
+      transparent 31deg,
+      rgba(255, 244, 211, 0.13) 39deg,
+      transparent 49deg
+    );
+  filter: blur(9px);
+  mix-blend-mode: screen;
+  transform-origin: 66% 18%;
+  animation: heroDayRays 8.5s ease-in-out infinite alternate;
+}
+
+#web_bg .hero-day-glow {
+  position: absolute;
+  top: -14%;
+  right: -9%;
+  width: min(68vw, 920px);
+  height: min(68vw, 920px);
+  border-radius: 50%;
+  opacity: 0.52;
+  background:
+    radial-gradient(
+      circle,
+      rgba(255, 248, 218, 0.34) 0,
+      rgba(255, 211, 145, 0.15) 30%,
+      transparent 68%
+    );
+  filter: blur(7px);
+  mix-blend-mode: screen;
+  animation: heroDayGlow 5.8s ease-in-out -1.2s infinite alternate;
+}
+
+[data-theme='dark'] #web_bg .hero-day-rays,
+[data-theme='dark'] #web_bg .hero-day-glow {
+  opacity: 0;
+  animation: none;
+}
+
+#web_bg .hero-stars {
+  inset: 55% 0 0;
+  opacity: 0.62;
+  background-image:
+    radial-gradient(circle at 8% 28%, rgba(187, 231, 255, 0.95) 0 1.5px, transparent 3px),
+    radial-gradient(circle at 19% 68%, rgba(118, 211, 255, 0.9) 0 1.2px, transparent 2.8px),
+    radial-gradient(circle at 31% 39%, rgba(224, 245, 255, 0.95) 0 1.6px, transparent 3.2px),
+    radial-gradient(circle at 46% 79%, rgba(108, 204, 255, 0.85) 0 1.3px, transparent 3px),
+    radial-gradient(circle at 59% 24%, rgba(223, 245, 255, 0.95) 0 1.5px, transparent 3px),
+    radial-gradient(circle at 76% 62%, rgba(117, 210, 255, 0.9) 0 1.4px, transparent 3px),
+    radial-gradient(circle at 91% 35%, rgba(226, 247, 255, 0.95) 0 1.5px, transparent 3px);
+  filter: drop-shadow(0 0 4px rgba(112, 207, 255, 0.9));
+  mix-blend-mode: screen;
+  animation: heroWaterLights 5.5s ease-in-out infinite alternate;
+}
+
+[data-theme='dark'] #web_bg .hero-stars {
+  inset: 0 0 37%;
+  opacity: 0.82;
+  background-image:
+    radial-gradient(circle at 8% 18%, #fff 0 1px, transparent 1.8px),
+    radial-gradient(circle at 17% 42%, #b9d9ff 0 1px, transparent 1.7px),
+    radial-gradient(circle at 27% 13%, #fff 0 1.2px, transparent 2px),
+    radial-gradient(circle at 36% 34%, #d5e9ff 0 0.9px, transparent 1.6px),
+    radial-gradient(circle at 46% 19%, #fff 0 1px, transparent 1.8px),
+    radial-gradient(circle at 57% 39%, #bcdcff 0 1.1px, transparent 1.9px),
+    radial-gradient(circle at 68% 12%, #fff 0 0.9px, transparent 1.7px),
+    radial-gradient(circle at 78% 31%, #d8ebff 0 1.2px, transparent 2px),
+    radial-gradient(circle at 88% 17%, #fff 0 1px, transparent 1.8px),
+    radial-gradient(circle at 94% 43%, #b9d9ff 0 0.9px, transparent 1.6px);
+  background-size: 71% 83%, 83% 77%, 91% 89%, 79% 93%, 87% 81%;
+  mix-blend-mode: screen;
+  filter: drop-shadow(0 0 3px rgba(143, 198, 255, 0.8));
+  animation:
+    heroStarsTwinkle 3.8s ease-in-out infinite alternate,
+    heroStarDrift 24s ease-in-out infinite alternate;
+}
+
+#web_bg .hero-meteors {
+  display: none;
+}
+
+[data-theme='dark'] #web_bg .hero-meteors {
+  position: absolute;
+  inset: 0 0 38%;
+  display: block;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+[data-theme='dark'] #web_bg .hero-meteors::before,
+[data-theme='dark'] #web_bg .hero-meteors::after {
+  position: absolute;
+  width: 190px;
+  height: 2px;
+  border-radius: 999px;
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(173, 218, 255, 0.24) 30%,
+      rgba(255, 255, 255, 0.98)
+    );
+  box-shadow: 38px 0 13px rgba(153, 207, 255, 0.3);
+  content: '';
+  opacity: 0;
+  transform: rotate(-22deg) translate3d(-32vw, -10vh, 0);
+}
+
+[data-theme='dark'] #web_bg .hero-meteors::before {
+  top: 18%;
+  left: 8%;
+  animation: heroMeteorOne 8.6s ease-in-out 1.2s infinite;
+}
+
+[data-theme='dark'] #web_bg .hero-meteors::after {
+  top: 43%;
+  left: 38%;
+  width: 125px;
+  animation: heroMeteorTwo 12.4s ease-in-out 5.1s infinite;
+}
+
+[data-theme='dark'] #web_bg .hero-stars::after {
+  position: absolute;
+  inset: 5% 2% 0;
+  background-image:
+    radial-gradient(circle at 13% 24%, #fff 0 0.8px, transparent 1.5px),
+    radial-gradient(circle at 31% 46%, #9fcaff 0 1px, transparent 1.8px),
+    radial-gradient(circle at 49% 11%, #fff 0 0.8px, transparent 1.5px),
+    radial-gradient(circle at 64% 27%, #bedcff 0 1px, transparent 1.8px),
+    radial-gradient(circle at 83% 44%, #fff 0 0.8px, transparent 1.5px);
+  content: '';
+  animation: heroStarsTwinkle 2.9s ease-in-out -1.4s infinite alternate-reverse;
+}
+
+[data-theme='dark'] #web_bg .hero-stars::before {
+  position: absolute;
+  top: 15%;
+  left: 17%;
+  width: 170px;
+  height: 2px;
+  border-radius: 999px;
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(208, 231, 255, 0.2) 28%,
+      rgba(255, 255, 255, 0.95)
+    );
+  box-shadow: 45px 0 12px rgba(167, 211, 255, 0.28);
+  content: '';
+  opacity: 0;
+  transform: rotate(-20deg) translate3d(-28vw, -8vh, 0);
+  animation: heroShootingStar 9s ease-in-out 1.8s infinite;
+}
+
+@keyframes heroStarsTwinkle {
+  0% {
+    opacity: 0.42;
+  }
+  55% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.58;
+  }
+}
+
+@keyframes heroStarDrift {
+  from {
+    transform: translate3d(-0.7%, 0.35%, 0) scale(1.015);
+  }
+  to {
+    transform: translate3d(0.7%, -0.35%, 0) scale(1.015);
+  }
+}
+
+@keyframes heroDayRays {
+  from {
+    opacity: 0.3;
+    transform: rotate(-1.5deg) scale(0.98);
+  }
+  to {
+    opacity: 0.62;
+    transform: rotate(2deg) scale(1.04);
+  }
+}
+
+@keyframes heroDayGlow {
+  from {
+    opacity: 0.34;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 0.68;
+    transform: scale(1.07);
+  }
+}
+
+@keyframes heroWaterLights {
+  from {
+    opacity: 0.38;
+    transform: translate3d(-1.5%, 1%, 0);
+  }
+  to {
+    opacity: 0.9;
+    transform: translate3d(1.8%, -1.2%, 0);
+  }
+}
+
+@keyframes heroShootingStar {
+  0%,
+  71% {
+    opacity: 0;
+    transform: rotate(-20deg) translate3d(-28vw, -8vh, 0);
+  }
+  74% {
+    opacity: 1;
+  }
+  82% {
+    opacity: 0;
+    transform: rotate(-20deg) translate3d(72vw, 18vh, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(-20deg) translate3d(72vw, 18vh, 0);
+  }
+}
+
+@keyframes heroMeteorOne {
+  0%,
+  68% {
+    opacity: 0;
+    transform: rotate(-22deg) translate3d(-32vw, -10vh, 0);
+  }
+  71% {
+    opacity: 1;
+  }
+  79%,
+  100% {
+    opacity: 0;
+    transform: rotate(-22deg) translate3d(86vw, 24vh, 0);
+  }
+}
+
+@keyframes heroMeteorTwo {
+  0%,
+  76% {
+    opacity: 0;
+    transform: rotate(-18deg) translate3d(-38vw, -7vh, 0);
+  }
+  79% {
+    opacity: 0.82;
+  }
+  86%,
+  100% {
+    opacity: 0;
+    transform: rotate(-18deg) translate3d(74vw, 19vh, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #web_bg {
+    transition: none;
+  }
+
+  #web_bg .hero-stars,
+  #web_bg .hero-stars::before,
+  #web_bg .hero-stars::after,
+  #web_bg .hero-day-rays,
+  #web_bg .hero-day-glow,
+  #web_bg .hero-meteors::before,
+  #web_bg .hero-meteors::after {
+    animation: none !important;
+  }
+
+  body.hero-reference-effect #page-header.full_page #site-info,
+  body.hero-reference-effect #page-header.full_page #scroll-down {
+    transform: none !important;
+  }
+}
